@@ -1,7 +1,7 @@
-package com.demo.controller;
+package com.demo.account;
 
-import com.demo.model.AccountStatusResponse;
-import com.demo.orchestrator.AccountStatusOrchestrator;
+import com.demo.account.model.AccountStatusResponse;
+import com.demo.account.orchestrator.AccountStatusOrchestrator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

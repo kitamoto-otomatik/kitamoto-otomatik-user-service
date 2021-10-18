@@ -1,8 +1,8 @@
-package com.demo.orchestrator;
+package com.demo.account.orchestrator;
 
-import com.demo.model.AccountStatus;
-import com.demo.model.KeycloakUser;
-import com.demo.service.KeycloakService;
+import com.demo.account.service.KeycloakService;
+import com.demo.account.model.AccountStatus;
+import com.demo.account.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,7 +1,7 @@
-package com.demo.service;
+package com.demo.account.service;
 
-import com.demo.model.AccessToken;
-import com.demo.model.KeycloakUser;
+import com.demo.account.model.AccessToken;
+import com.demo.account.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
