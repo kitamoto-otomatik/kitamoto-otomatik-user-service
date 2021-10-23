@@ -1,7 +1,7 @@
 package com.demo.account;
 
 import com.demo.account.model.AccountStatusResponse;
-import com.demo.account.orchestrator.AccountStatusOrchestrator;
+import com.demo.account.orchestrator.AccountStatusService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/accounts")
 public class AccountController {
     @Autowired
-    private AccountStatusOrchestrator orchestrator;
+    private AccountStatusService orchestrator;
 
     @GetMapping("/{username}")
     public AccountStatusResponse getAccountStatus(@PathVariable String username) {
