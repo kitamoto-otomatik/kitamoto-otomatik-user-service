@@ -1,20 +1,18 @@
-package com.demo.account.service;
+package com.demo.account.client;
 
+import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccessToken;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Component
 public class KeycloakTokenClient {
@@ -42,31 +40,20 @@ public class KeycloakTokenClient {
     @Value("${keycloak.token.client.secret.value}")
     private String clientSecretValue;
 
-    public KeycloakTokenClient() {
-    }
-
     public Optional<String> getKeycloakToken() {
-        Function<UriBuilder, URI> uriBuilderURIFunction = e -> e.path(tokenEndpoint).build();
-
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add(grantTypeKey, grantTypeValue);
         formData.add(clientIdKey, clientIdValue);
         formData.add(clientSecretKey, clientSecretValue);
 
-        Function<ClientResponse, Mono<AccessToken>> clientResponseMonoFunction = response -> {
-            if (response.statusCode().is2xxSuccessful()) {
-                return response.bodyToMono(AccessToken.class);
-            } else {
-                return response.createException().flatMap(Mono::error);
-            }
-        };
-
         AccessToken accessToken = WebClient.builder().baseUrl(host).build()
                 .post()
-                .uri(uriBuilderURIFunction)
+                .uri(e -> e.path(tokenEndpoint).build())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(formData))
-                .exchangeToMono(clientResponseMonoFunction)
+                .retrieve()
+                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
+                .bodyToMono(AccessToken.class)
                 .block();
 
         return null == accessToken ? Optional.empty() : Optional.of(accessToken.getAccessToken());
