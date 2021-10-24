@@ -30,19 +30,18 @@ public class KeycloakUserClient {
     }
 
     public Mono<List<KeycloakUser>> getUserListByUsername(String username) {
-        return tokenService.getKeycloakToken()
-                .flatMap(token -> WebClient.builder()
-                        .baseUrl(host)
-                        .build()
-                        .get()
-                        .uri(e -> e.path(usersEndpoint).queryParam("username", username).build())
-                        .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-                        .retrieve()
-                        .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(ERROR_MESSAGE)))
-                        .bodyToMono(KeycloakUser[].class)
-                        .doOnError(e -> {
-                            throw new KeycloakException(ERROR_MESSAGE);
-                        })
-                        .map(Arrays::asList));
+        return tokenService.getKeycloakToken().flatMap(token -> WebClient.builder()
+                .baseUrl(host)
+                .build()
+                .get()
+                .uri(e -> e.path(usersEndpoint).queryParam("username", username).build())
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .retrieve()
+                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(ERROR_MESSAGE)))
+                .bodyToMono(KeycloakUser[].class)
+                .doOnError(e -> {
+                    throw new KeycloakException(ERROR_MESSAGE);
+                })
+                .map(Arrays::asList));
     }
 }
