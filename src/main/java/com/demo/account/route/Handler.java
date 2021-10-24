@@ -4,7 +4,7 @@ import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.AccountStatusResponse;
 import com.demo.account.service.AccountStatusService;
-import com.demo.model.ErrorBody;
+import com.demo.account.model.ErrorBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
