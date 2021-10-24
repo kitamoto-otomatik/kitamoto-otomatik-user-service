@@ -14,6 +14,8 @@ import java.util.List;
 
 @Component
 public class KeycloakUserClient {
+    private static final String ERROR_MESSAGE = "Could not get Keycloak users";
+
     private final KeycloakTokenClient tokenService;
 
     @Value("${keycloak.host}")
@@ -36,10 +38,10 @@ public class KeycloakUserClient {
                         .uri(e -> e.path(usersEndpoint).queryParam("username", username).build())
                         .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
                         .retrieve()
-                        .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak users")))
+                        .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(ERROR_MESSAGE)))
                         .bodyToMono(KeycloakUser[].class)
                         .doOnError(e -> {
-                            throw new KeycloakException("Could not get Keycloak users");
+                            throw new KeycloakException(ERROR_MESSAGE);
                         })
                         .map(Arrays::asList));
     }

@@ -10,6 +10,8 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class Service {
+    private static final String ERROR_MESSAGE = "Found multiple users with the same username";
+
     private final KeycloakUserClient keycloakUserClient;
 
     @Autowired
@@ -23,7 +25,7 @@ public class Service {
                     if (CollectionUtils.isEmpty(e)) {
                         return AccountStatus.UNREGISTERED;
                     } else if (e.size() > 1) {
-                        throw new KeycloakException("Found multiple users with the same username");
+                        throw new KeycloakException(ERROR_MESSAGE);
                     } else if (e.get(0).isEmailVerified()) {
                         return AccountStatus.ACTIVE;
                     } else {

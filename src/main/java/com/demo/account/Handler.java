@@ -1,7 +1,7 @@
 package com.demo.account;
 
 import com.demo.account.model.AccountStatusResponse;
-import com.demo.account.model.ErrorBody;
+import com.demo.account.model.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,14 +18,12 @@ public class Handler {
 
     public Mono<ServerResponse> getAccountStatusByUsername(ServerRequest request) {
         return service.getAccountStatusByUsername(request.pathVariable("username"))
-                .flatMap(e ->
-                        ServerResponse.ok()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(BodyInserters.fromValue(new AccountStatusResponse(e))))
-                .onErrorResume(e ->
-                        ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(BodyInserters.fromValue(new ErrorBody(e.getClass().getSimpleName(), e.getMessage())))
+                .flatMap(e -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(new AccountStatusResponse(e))))
+                .onErrorResume(e -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(new ErrorResponse(e.getClass().getSimpleName(), e.getMessage())))
                 );
     }
 }

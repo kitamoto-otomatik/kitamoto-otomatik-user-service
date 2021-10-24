@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class KeycloakTokenClient {
+    private static final String ERROR_MESSAGE = "Could not get Keycloak access token";
+
     @Value("${keycloak.host}")
     private String host;
 
@@ -52,10 +54,10 @@ public class KeycloakTokenClient {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
-                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
+                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(ERROR_MESSAGE)))
                 .bodyToMono(AccessToken.class)
                 .doOnError(e -> {
-                    throw new KeycloakException("Could not get Keycloak users");
+                    throw new KeycloakException(ERROR_MESSAGE);
                 })
                 .map(AccessToken::getAccessToken);
     }

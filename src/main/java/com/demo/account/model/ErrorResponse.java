@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class ErrorBody {
+public class ErrorResponse {
     private final String code;
     private final String message;
 }
