@@ -1,4 +1,4 @@
-package com.demo.account.service;
+package com.demo.account;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.KeycloakException;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
-public class AccountStatusService {
+public class Service {
     private final KeycloakUserClient keycloakUserClient;
 
     @Autowired
-    public AccountStatusService(KeycloakUserClient keycloakUserClient) {
+    public Service(KeycloakUserClient keycloakUserClient) {
         this.keycloakUserClient = keycloakUserClient;
     }
 

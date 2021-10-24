@@ -2,7 +2,6 @@ package com.demo.account;
 
 import com.demo.account.model.AccountStatusResponse;
 import com.demo.account.model.ErrorBody;
-import com.demo.account.service.AccountStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class Handler {
     @Autowired
-    private AccountStatusService service;
+    private Service service;
 
     public Mono<ServerResponse> getAccountStatusByUsername(ServerRequest request) {
         return service.getAccountStatusByUsername(request.pathVariable("username"))
