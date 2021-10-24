@@ -10,6 +10,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -41,21 +42,25 @@ public class KeycloakTokenClient {
     private String clientSecretValue;
 
     public Optional<String> getKeycloakToken() {
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(grantTypeKey, grantTypeValue);
-        formData.add(clientIdKey, clientIdValue);
-        formData.add(clientSecretKey, clientSecretValue);
+        try {
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add(grantTypeKey, grantTypeValue);
+            formData.add(clientIdKey, clientIdValue);
+            formData.add(clientSecretKey, clientSecretValue);
 
-        AccessToken accessToken = WebClient.builder().baseUrl(host).build()
-                .post()
-                .uri(e -> e.path(tokenEndpoint).build())
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData(formData))
-                .retrieve()
-                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
-                .bodyToMono(AccessToken.class)
-                .block();
+            AccessToken accessToken = WebClient.builder().baseUrl(host).build()
+                    .post()
+                    .uri(e -> e.path(tokenEndpoint).build())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(BodyInserters.fromFormData(formData))
+                    .retrieve()
+                    .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
+                    .bodyToMono(AccessToken.class)
+                    .block();
 
-        return null == accessToken ? Optional.empty() : Optional.of(accessToken.getAccessToken());
+            return null == accessToken ? Optional.empty() : Optional.of(accessToken.getAccessToken());
+        } catch (WebClientRequestException e) {
+            throw new KeycloakException("Could not get Keycloak access token");
+        }
     }
 }
