@@ -39,7 +39,7 @@ public class KeycloakTokenClient {
     @Value("${keycloak.token.client.secret.value}")
     private String clientSecretValue;
 
-    public String getKeycloakToken() {
+    public Mono<String> getKeycloakToken() {
         try {
             MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
             formData.add(grantTypeKey, grantTypeValue);
@@ -56,9 +56,7 @@ public class KeycloakTokenClient {
                     .retrieve()
                     .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
                     .bodyToMono(AccessToken.class)
-                    .blockOptional()
-                    .orElseThrow(() -> new KeycloakException("Could not get Keycloak access token"))
-                    .getAccessToken();
+                    .map(AccessToken::getAccessToken);
         } catch (WebClientRequestException e) {
             throw new KeycloakException("Could not get Keycloak access token");
         }

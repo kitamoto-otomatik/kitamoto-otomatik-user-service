@@ -25,54 +25,54 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("mock")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class IntegrationTest {
-    @Autowired
-    private MockMvc mockMvc;
-
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    public void setup() {
-        objectMapper = new ObjectMapper();
-    }
-
-    @Test
-    public void auth_decode_refresh() throws Exception {
-        AuthenticationRequest request = new AuthenticationRequest();
-        request.setType("root");
-        request.setUsername("nikkinicholas@gmail.com");
-        request.setPassword("nikki_password");
-
-        MvcResult result = mockMvc.perform(post("/users/auth")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(request)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-
-        AuthenticationResponse authenticationResponse = objectMapper.readValue(result.getResponse().getContentAsString(), AuthenticationResponse.class);
-        assertThat(authenticationResponse).isNotNull();
-
-        TokenDecodeRequest tokenDecodeRequest = new TokenDecodeRequest();
-        tokenDecodeRequest.setToken(authenticationResponse.getAccessToken().getToken());
-
-        result = mockMvc.perform(post("/tokens/decode")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(tokenDecodeRequest)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-
-        TokenRefreshRequest tokenRefreshRequest = new TokenRefreshRequest();
-        tokenRefreshRequest.setRefreshToken(authenticationResponse.getRefreshToken().getToken());
-
-        result = mockMvc.perform(post("/tokens/refresh")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(tokenRefreshRequest)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-
-        authenticationResponse = objectMapper.readValue(result.getResponse().getContentAsString(), AuthenticationResponse.class);
-        assertThat(authenticationResponse).isNotNull();
-    }
+//    @Autowired
+//    private MockMvc mockMvc;
+//
+//    private ObjectMapper objectMapper;
+//
+//    @BeforeEach
+//    public void setup() {
+//        objectMapper = new ObjectMapper();
+//    }
+//
+//    @Test
+//    public void auth_decode_refresh() throws Exception {
+//        AuthenticationRequest request = new AuthenticationRequest();
+//        request.setType("root");
+//        request.setUsername("nikkinicholas@gmail.com");
+//        request.setPassword("nikki_password");
+//
+//        MvcResult result = mockMvc.perform(post("/users/auth")
+//                .contentType("application/json")
+//                .content(objectMapper.writeValueAsString(request)))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andReturn();
+//
+//        AuthenticationResponse authenticationResponse = objectMapper.readValue(result.getResponse().getContentAsString(), AuthenticationResponse.class);
+//        assertThat(authenticationResponse).isNotNull();
+//
+//        TokenDecodeRequest tokenDecodeRequest = new TokenDecodeRequest();
+//        tokenDecodeRequest.setToken(authenticationResponse.getAccessToken().getToken());
+//
+//        result = mockMvc.perform(post("/tokens/decode")
+//                .contentType("application/json")
+//                .content(objectMapper.writeValueAsString(tokenDecodeRequest)))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andReturn();
+//
+//        TokenRefreshRequest tokenRefreshRequest = new TokenRefreshRequest();
+//        tokenRefreshRequest.setRefreshToken(authenticationResponse.getRefreshToken().getToken());
+//
+//        result = mockMvc.perform(post("/tokens/refresh")
+//                .contentType("application/json")
+//                .content(objectMapper.writeValueAsString(tokenRefreshRequest)))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andReturn();
+//
+//        authenticationResponse = objectMapper.readValue(result.getResponse().getContentAsString(), AuthenticationResponse.class);
+//        assertThat(authenticationResponse).isNotNull();
+//    }
 }

@@ -2,7 +2,7 @@ package com.demo.orchestrator;
 
 import com.demo.model.AuthenticationRequest;
 import com.demo.model.AuthenticationResponse;
-import com.demo.model.UserAccount;
+import com.demo.repository.UserAccount;
 import com.demo.repository.UserAccountRepository;
 import com.demo.service.AuthenticationResponseBuilder;
 import com.demo.service.HashService;

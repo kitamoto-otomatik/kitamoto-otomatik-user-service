@@ -1,4 +1,4 @@
-package com.demo;
+package com.demo.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +12,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -23,7 +22,7 @@ import java.util.HashMap;
         entityManagerFactoryRef = "entityManager",
         transactionManagerRef = "transactionManager"
 )
-public class ApplicationConfig implements WebMvcConfigurer {
+public class DatabaseConfiguration {
     @Value("${demo.database.driver}")
     private String driver;
 

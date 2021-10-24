@@ -1,6 +1,5 @@
 package com.demo.repository;
 
-import com.demo.model.UserAccount;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

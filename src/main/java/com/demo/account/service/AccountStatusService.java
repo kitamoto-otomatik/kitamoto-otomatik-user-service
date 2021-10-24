@@ -3,11 +3,10 @@ package com.demo.account.service;
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
-import com.demo.account.model.KeycloakUser;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
+import reactor.core.publisher.Mono;
 
 @Component
 public class AccountStatusService {
@@ -18,17 +17,18 @@ public class AccountStatusService {
         this.keycloakUserClient = keycloakUserClient;
     }
 
-    public AccountStatus getAccountStatusByUsername(String username) {
-        List<KeycloakUser> keycloakUserList = keycloakUserClient.getUserListByUsername(username);
-
-        if (keycloakUserList.size() == 0) {
-            return AccountStatus.UNREGISTERED;
-        } else if (keycloakUserList.size() > 1) {
-            throw new KeycloakException("Found multiple users with the same username");
-        } else if (keycloakUserList.get(0).isEmailVerified()) {
-            return AccountStatus.ACTIVE;
-        } else {
-            return AccountStatus.UNVERIFIED;
-        }
+    public Mono<AccountStatus> getAccountStatusByUsername(String username) {
+        return keycloakUserClient.getUserListByUsername(username).map(e -> {
+            if (CollectionUtils.isEmpty(e)) {
+                return AccountStatus.UNREGISTERED;
+            } else if (e.size() > 1) {
+                throw new KeycloakException("Found multiple users with the same username");
+            } else if (e.get(0).isEmailVerified()) {
+                return AccountStatus.ACTIVE;
+            } else {
+                return AccountStatus.UNVERIFIED;
+            }
+        });
     }
 }
+
