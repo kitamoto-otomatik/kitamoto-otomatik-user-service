@@ -51,7 +51,13 @@ public class ServiceTest {
 
     @Test
     public void getAccountStatusByUsername_whenFoundMoreThanOneAccount() {
-        List<KeycloakUser> keycloakUserList = Arrays.asList(new KeycloakUser(), new KeycloakUser());
+        KeycloakUser keycloakUser1 = new KeycloakUser();
+        keycloakUser1.setEmailVerified(true);
+        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
+        KeycloakUser keycloakUser2 = new KeycloakUser();
+        keycloakUser2.setEmailVerified(true);
+        keycloakUser2.setUsername("nikkinicholas.romero@gmail.com");
+        List<KeycloakUser> keycloakUserList = Arrays.asList(keycloakUser1, keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(Mono.just(keycloakUserList));
 
         Mono<AccountStatus> actual = target.getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
@@ -65,9 +71,13 @@ public class ServiceTest {
 
     @Test
     public void getAccountStatusByUsername_whenActive() {
-        KeycloakUser keycloakUser = new KeycloakUser();
-        keycloakUser.setEmailVerified(true);
-        List<KeycloakUser> keycloakUserList = Arrays.asList(keycloakUser);
+        KeycloakUser keycloakUser1 = new KeycloakUser();
+        keycloakUser1.setEmailVerified(true);
+        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
+        KeycloakUser keycloakUser2 = new KeycloakUser();
+        keycloakUser2.setEmailVerified(true);
+        keycloakUser2.setUsername("nikkinicholas.romero@yahoo.com");
+        List<KeycloakUser> keycloakUserList = Arrays.asList(keycloakUser1, keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(Mono.just(keycloakUserList));
 
         Mono<AccountStatus> actual = target.getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
@@ -83,6 +93,7 @@ public class ServiceTest {
     public void getAccountStatusByUsername_whenUnverified() {
         KeycloakUser keycloakUser = new KeycloakUser();
         keycloakUser.setEmailVerified(false);
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
         List<KeycloakUser> keycloakUserList = Arrays.asList(keycloakUser);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(Mono.just(keycloakUserList));
 
