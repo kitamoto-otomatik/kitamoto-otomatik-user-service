@@ -10,7 +10,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -40,25 +39,24 @@ public class KeycloakTokenClient {
     private String clientSecretValue;
 
     public Mono<String> getKeycloakToken() {
-        try {
-            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-            formData.add(grantTypeKey, grantTypeValue);
-            formData.add(clientIdKey, clientIdValue);
-            formData.add(clientSecretKey, clientSecretValue);
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add(grantTypeKey, grantTypeValue);
+        formData.add(clientIdKey, clientIdValue);
+        formData.add(clientSecretKey, clientSecretValue);
 
-            return WebClient.builder()
-                    .baseUrl(host)
-                    .build()
-                    .post()
-                    .uri(e -> e.path(tokenEndpoint).build())
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .body(BodyInserters.fromFormData(formData))
-                    .retrieve()
-                    .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
-                    .bodyToMono(AccessToken.class)
-                    .map(AccessToken::getAccessToken);
-        } catch (WebClientRequestException e) {
-            throw new KeycloakException("Could not get Keycloak access token");
-        }
+        return WebClient.builder()
+                .baseUrl(host)
+                .build()
+                .post()
+                .uri(e -> e.path(tokenEndpoint).build())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(formData))
+                .retrieve()
+                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
+                .bodyToMono(AccessToken.class)
+                .doOnError(e -> {
+                    throw new KeycloakException("Could not get Keycloak users");
+                })
+                .map(AccessToken::getAccessToken);
     }
 }

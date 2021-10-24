@@ -1,4 +1,4 @@
-package com.demo.account.route;
+package com.demo.account;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
