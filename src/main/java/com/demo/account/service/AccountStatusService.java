@@ -8,28 +8,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class AccountStatusService {
+    private final KeycloakUserClient keycloakUserClient;
+
     @Autowired
-    private KeycloakUserClient keycloakUserClient;
+    public AccountStatusService(KeycloakUserClient keycloakUserClient) {
+        this.keycloakUserClient = keycloakUserClient;
+    }
 
     public AccountStatus getAccountStatusByUsername(String username) {
-        Optional<List<KeycloakUser>> optionalKeycloakUserList = keycloakUserClient.getUserListByUsername(username);
-        if (optionalKeycloakUserList.isPresent()) {
-            List<KeycloakUser> keycloakUserList = optionalKeycloakUserList.get();
-            if (keycloakUserList.size() != 1) {
-                throw new KeycloakException("Application is invalid state");
-            }
+        List<KeycloakUser> keycloakUserList = keycloakUserClient.getUserListByUsername(username);
 
-            if (keycloakUserList.get(0).isEmailVerified()) {
-                return AccountStatus.ACTIVE;
-            } else {
-                return AccountStatus.UNVERIFIED;
-            }
-        } else {
+        if (keycloakUserList.size() == 0) {
             return AccountStatus.UNREGISTERED;
+        } else if (keycloakUserList.size() > 1) {
+            throw new KeycloakException("Found multiple users with the same username");
+        } else if (keycloakUserList.get(0).isEmailVerified()) {
+            return AccountStatus.ACTIVE;
+        } else {
+            return AccountStatus.UNVERIFIED;
         }
     }
 }

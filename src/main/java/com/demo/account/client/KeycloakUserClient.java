@@ -12,7 +12,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class KeycloakUserClient {
@@ -32,18 +31,20 @@ public class KeycloakUserClient {
         this.tokenService = tokenService;
     }
 
-    public Optional<List<KeycloakUser>> getUserListByUsername(String username) {
+    public List<KeycloakUser> getUserListByUsername(String username) {
         try {
-            KeycloakUser[] keycloakUsers = WebClient.builder().baseUrl(host).build()
+            return Arrays.asList(WebClient
+                    .builder()
+                    .baseUrl(host)
+                    .build()
                     .get()
                     .uri(e -> e.path(usersEndpoint).queryParam(usernameQueryParam, username).build())
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken().orElseThrow(RuntimeException::new)))
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
                     .retrieve()
                     .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak users")))
                     .bodyToMono(KeycloakUser[].class)
-                    .block();
-
-            return null == keycloakUsers ? Optional.empty() : Optional.of(Arrays.asList(keycloakUsers));
+                    .blockOptional()
+                    .orElse(new KeycloakUser[0]));
         } catch (WebClientRequestException e) {
             throw new KeycloakException("Could not get Keycloak users");
         }

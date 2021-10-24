@@ -15,8 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
+    private final AccountStatusService service;
+
     @Autowired
-    private AccountStatusService service;
+    public AccountController(AccountStatusService service) {
+        this.service = service;
+    }
 
     @GetMapping("/{username}")
     public AccountStatusResponse getAccountStatus(@PathVariable String username) {

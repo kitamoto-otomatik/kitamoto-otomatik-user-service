@@ -13,8 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
 @Component
 public class KeycloakTokenClient {
     @Value("${keycloak.host}")
@@ -41,14 +39,16 @@ public class KeycloakTokenClient {
     @Value("${keycloak.token.client.secret.value}")
     private String clientSecretValue;
 
-    public Optional<String> getKeycloakToken() {
+    public String getKeycloakToken() {
         try {
             MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
             formData.add(grantTypeKey, grantTypeValue);
             formData.add(clientIdKey, clientIdValue);
             formData.add(clientSecretKey, clientSecretValue);
 
-            AccessToken accessToken = WebClient.builder().baseUrl(host).build()
+            return WebClient.builder()
+                    .baseUrl(host)
+                    .build()
                     .post()
                     .uri(e -> e.path(tokenEndpoint).build())
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -56,9 +56,9 @@ public class KeycloakTokenClient {
                     .retrieve()
                     .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException("Could not get Keycloak access token")))
                     .bodyToMono(AccessToken.class)
-                    .block();
-
-            return null == accessToken ? Optional.empty() : Optional.of(accessToken.getAccessToken());
+                    .blockOptional()
+                    .orElseThrow(() -> new KeycloakException("Could not get Keycloak access token"))
+                    .getAccessToken();
         } catch (WebClientRequestException e) {
             throw new KeycloakException("Could not get Keycloak access token");
         }
