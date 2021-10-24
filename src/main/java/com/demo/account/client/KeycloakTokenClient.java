@@ -12,9 +12,12 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.PostConstruct;
+
 @Component
 public class KeycloakTokenClient {
     private static final String ERROR_MESSAGE = "Could not get Keycloak access token";
+    private WebClient webClient;
 
     @Value("${keycloak.host}")
     private String host;
@@ -40,15 +43,20 @@ public class KeycloakTokenClient {
     @Value("${keycloak.token.client.secret.value}")
     private String clientSecretValue;
 
+    @PostConstruct
+    public void postConstruct() {
+        this.webClient = WebClient.builder()
+                .baseUrl(host)
+                .build();
+    }
+
     public Mono<String> getKeycloakToken() {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add(grantTypeKey, grantTypeValue);
         formData.add(clientIdKey, clientIdValue);
         formData.add(clientSecretKey, clientSecretValue);
 
-        return WebClient.builder()
-                .baseUrl(host)
-                .build()
+        return webClient
                 .post()
                 .uri(e -> e.path(tokenEndpoint).build())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
