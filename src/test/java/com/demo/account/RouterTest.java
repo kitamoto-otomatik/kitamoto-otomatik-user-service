@@ -4,6 +4,7 @@ import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.AccountStatusResponse;
 import com.demo.account.model.ErrorResponse;
+import com.demo.account.service.GetAccountStatusByUsernameService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +23,14 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class RouterTest {
     @MockBean
-    public Service service;
+    public GetAccountStatusByUsernameService getAccountStatusByUsernameService;
 
     @Autowired
     private WebTestClient webTestClient;
 
     @Test
     public void getAccountStatusByUsername_whenActive() {
-        when(service.getAccountStatusByUsername(anyString())).thenReturn(Mono.just(AccountStatus.ACTIVE));
+        when(getAccountStatusByUsernameService.getAccountStatusByUsername(anyString())).thenReturn(Mono.just(AccountStatus.ACTIVE));
 
         webTestClient
                 .get()
@@ -40,12 +41,12 @@ public class RouterTest {
                     assertThat(response.getStatus()).isEqualTo(AccountStatus.ACTIVE);
                 });
 
-        verify(service).getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
+        verify(getAccountStatusByUsernameService).getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
     }
 
     @Test
     public void getAccountStatusByUsername_whenError() {
-        when(service.getAccountStatusByUsername(anyString())).thenReturn(Mono.error(new KeycloakException("Some Keycloak error")));
+        when(getAccountStatusByUsernameService.getAccountStatusByUsername(anyString())).thenReturn(Mono.error(new KeycloakException("Some Keycloak error")));
 
         webTestClient
                 .get()
@@ -57,6 +58,6 @@ public class RouterTest {
                     assertThat(response.getMessage()).isEqualTo("Some Keycloak error");
                 });
 
-        verify(service).getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
+        verify(getAccountStatusByUsernameService).getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
     }
 }

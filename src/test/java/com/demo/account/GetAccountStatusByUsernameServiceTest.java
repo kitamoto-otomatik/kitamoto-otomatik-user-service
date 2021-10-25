@@ -4,6 +4,7 @@ import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.KeycloakUser;
+import com.demo.account.service.GetAccountStatusByUsernameService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -21,9 +22,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class ServiceTest {
+public class GetAccountStatusByUsernameServiceTest {
     @InjectMocks
-    private Service target;
+    private GetAccountStatusByUsernameService target;
 
     @Mock
     private KeycloakUserClient keycloakUserClient;

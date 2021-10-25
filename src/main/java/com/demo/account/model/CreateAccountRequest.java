@@ -3,10 +3,8 @@ package com.demo.account.model;
 import lombok.Data;
 
 @Data
-public class KeycloakUser {
+public class CreateAccountRequest {
     private String username;
-    private String email;
     private String firstName;
     private String lastName;
-    private boolean emailVerified;
 }

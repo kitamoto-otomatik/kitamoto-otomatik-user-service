@@ -1,4 +1,4 @@
-package com.demo.account;
+package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.KeycloakException;
@@ -6,20 +6,20 @@ import com.demo.account.model.AccountStatus;
 import com.demo.account.model.KeycloakUser;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
-public class Service {
+@Service
+public class GetAccountStatusByUsernameService {
     private static final String ERROR_MESSAGE = "Found multiple users with the same username";
 
     private final KeycloakUserClient keycloakUserClient;
 
     @Autowired
-    public Service(KeycloakUserClient keycloakUserClient) {
+    public GetAccountStatusByUsernameService(KeycloakUserClient keycloakUserClient) {
         this.keycloakUserClient = keycloakUserClient;
     }
 
