@@ -12,7 +12,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 @Configuration(proxyBeanMethods = false)
 public class Router {
     @Bean
-    public RouterFunction<ServerResponse> getAccountStatusByUsername(Handler accountHandler) {
+    public RouterFunction<ServerResponse> router(Handler accountHandler) {
         return RouterFunctions
                 .route(GET("/accounts/{username}"), accountHandler::getAccountStatusByUsername)
                 .andRoute(POST("/accounts"), accountHandler::createAccount);
