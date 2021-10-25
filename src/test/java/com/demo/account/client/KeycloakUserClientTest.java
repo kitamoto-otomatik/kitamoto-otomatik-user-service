@@ -103,6 +103,72 @@ public class KeycloakUserClientTest {
                 .verify();
     }
 
+    @Test
+    public void createAccount_whenOk() throws JsonProcessingException, InterruptedException {
+        when(tokenService.getKeycloakToken()).thenReturn(Mono.just("someAccessToken"));
+
+        MockResponse response = new MockResponse()
+                .setResponseCode(HttpStatus.CREATED.value());
+
+        server.enqueue(response);
+
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser.setEmail("nikkinicholas.romero@gmail.com");
+        keycloakUser.setFirstName("Nikki Nicholas");
+        keycloakUser.setLastName("Romero");
+
+        StepVerifier.create(target.createAccount(keycloakUser))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertThat(request.getMethod()).isEqualTo("POST");
+        assertThat(request.getPath()).isEqualTo("/auth/admin/realms/kitamoto-otomatik/users");
+        assertThat(request.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(request.getBody().readUtf8()).isEqualTo(mapper.writeValueAsString(keycloakUser));
+    }
+
+    @Test
+    public void createAccount_whenError() throws InterruptedException, JsonProcessingException {
+        when(tokenService.getKeycloakToken()).thenReturn(Mono.just("someAccessToken"));
+
+        MockResponse response = new MockResponse()
+                .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        server.enqueue(response);
+
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser.setEmail("nikkinicholas.romero@gmail.com");
+        keycloakUser.setFirstName("Nikki Nicholas");
+        keycloakUser.setLastName("Romero");
+
+        StepVerifier.create(target.createAccount(keycloakUser))
+                .expectError(KeycloakException.class)
+                .verify();
+
+        RecordedRequest request = server.takeRequest();
+        assertThat(request.getMethod()).isEqualTo("POST");
+        assertThat(request.getPath()).isEqualTo("/auth/admin/realms/kitamoto-otomatik/users");
+        assertThat(request.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(request.getBody().readUtf8()).isEqualTo(mapper.writeValueAsString(keycloakUser));
+    }
+
+    @Test
+    public void createAccount_whenTokenServiceErrors() {
+        when(tokenService.getKeycloakToken()).thenReturn(Mono.error(new KeycloakException("")));
+
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser.setEmail("nikkinicholas.romero@gmail.com");
+        keycloakUser.setFirstName("Nikki Nicholas");
+        keycloakUser.setLastName("Romero");
+
+        StepVerifier.create(target.createAccount(keycloakUser))
+                .expectError(KeycloakException.class)
+                .verify();
+    }
+
     @AfterEach
     public void tearDown() throws IOException {
         server.shutdown();

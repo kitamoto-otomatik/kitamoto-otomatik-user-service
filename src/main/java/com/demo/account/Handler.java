@@ -34,6 +34,7 @@ public class Handler {
                 );
     }
 
+    // TODO : Fix returned HTTP status code
     public Mono<ServerResponse> createAccount(ServerRequest request) {
         return createAccountService.createAccount(request.bodyToMono(CreateAccountRequest.class))
                 .flatMap(e -> ServerResponse.status(HttpStatus.CREATED).build())
