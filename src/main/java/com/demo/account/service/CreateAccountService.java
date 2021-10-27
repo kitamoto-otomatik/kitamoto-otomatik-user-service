@@ -19,6 +19,7 @@ public class CreateAccountService {
     }
 
     // TODO : Add validation
+    // TODO : Persist verification code
     // TODO : Send email verification on success
     public Mono<Void> createAccount(Mono<CreateAccountRequest> createAccountRequestMono) {
         return createAccountRequestMono
