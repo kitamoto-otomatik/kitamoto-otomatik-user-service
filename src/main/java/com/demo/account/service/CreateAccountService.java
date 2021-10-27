@@ -19,6 +19,7 @@ public class CreateAccountService {
     }
 
     // TODO : Add validation
+    // TODO : Send email verification on success
     public Mono<Void> createAccount(Mono<CreateAccountRequest> createAccountRequestMono) {
         return createAccountRequestMono
                 .map(mapToKeycloakUser())
