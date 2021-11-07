@@ -1,4 +1,4 @@
 Fix returned HTTP status code of createAccount flow
 Add endpoint validation
 Persist verification code
-Send email verification on success
+Send email verification on successful registration
