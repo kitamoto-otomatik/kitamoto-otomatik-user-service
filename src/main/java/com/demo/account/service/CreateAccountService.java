@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -36,8 +33,8 @@ public class CreateAccountService {
 
     private Function<CreateAccountRequest, KeycloakUser> mapToKeycloakUser() {
         return createAccountRequest -> {
-            Map<String, String> attributes = new HashMap<>();
-            attributes.put(VERIFICATION_CODE, generateVerificationCode());
+            Map<String, List<String>> attributes = new HashMap<>();
+            attributes.put(VERIFICATION_CODE, Arrays.asList(generateVerificationCode()));
 
             Credential credential = new Credential();
             credential.setType(PASSWORD);

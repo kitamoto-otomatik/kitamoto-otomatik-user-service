@@ -11,7 +11,7 @@ public class KeycloakUser {
     private String email;
     private String firstName;
     private String lastName;
-    private Map<String, String> attributes;
+    private Map<String, List<String>> attributes;
     private List<Credential> credentials;
     private boolean emailVerified;
     private boolean enabled;
