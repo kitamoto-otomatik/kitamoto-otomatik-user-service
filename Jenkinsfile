@@ -22,8 +22,10 @@ pipeline {
         stage("Deploy Image") {
             steps {
                 withKubeConfig([credentialsId: "kubernetes_credentials", serverUrl: "${KUBERNETES_HOME}"]) {
+                    bat "kubectl --namespace=kitamoto-otomatik delete configmap --ignore-not-found=true ${APP_NAME}"
                     bat "kubectl --namespace=kitamoto-otomatik delete service --ignore-not-found=true ${APP_NAME}"
                     bat "kubectl --namespace=kitamoto-otomatik delete deployments --ignore-not-found=true ${APP_NAME}"
+                    bat "kubectl --namespace=kitamoto-otomatik apply -f kubernetes/configmap.yaml"
                     bat "kubectl --namespace=kitamoto-otomatik apply -f kubernetes/deployment.yaml"
                     bat "kubectl --namespace=kitamoto-otomatik apply -f kubernetes/service.yaml"
                 }
