@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AccountController.class)
@@ -46,7 +45,8 @@ public class AccountControllerTest {
                 .thenReturn(AccountStatus.ACTIVE);
 
         mockMvc.perform(get("/accounts/nikkinicholas.romero@gmail.com"))
-                .andDo(print())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(status().isOk());
 
         verify(getAccountStatusByUsernameService).getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
