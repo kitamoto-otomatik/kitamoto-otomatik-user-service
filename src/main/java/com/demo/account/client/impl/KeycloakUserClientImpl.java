@@ -14,17 +14,14 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 
-// TODO : Add unit test
 @Component
 @Profile("!mock")
 public class KeycloakUserClientImpl implements KeycloakUserClient {
     private static final String GET_ACCOUNT_ERROR_MESSAGE = "Could not get Keycloak users";
     private final KeycloakTokenClient tokenService;
-    private WebClient webClient;
 
     @Value("${keycloak.host}")
     private String host;
@@ -37,16 +34,12 @@ public class KeycloakUserClientImpl implements KeycloakUserClient {
         this.tokenService = tokenService;
     }
 
-    @PostConstruct
-    public void postConstruct() {
-        this.webClient = WebClient.builder()
-                .baseUrl(host)
-                .build();
-    }
-
     @Override
     public List<KeycloakUser> getUserListByUsername(String username) {
-        return webClient.get()
+        return WebClient.builder()
+                .baseUrl(host)
+                .build()
+                .get()
                 .uri(e -> e.path(usersEndpoint).queryParam("username", username).build())
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
                 .retrieve()
@@ -61,7 +54,10 @@ public class KeycloakUserClientImpl implements KeycloakUserClient {
 
     @Override
     public void createAccount(KeycloakUser keycloakUser) {
-        webClient.post()
+        WebClient.builder()
+                .baseUrl(host)
+                .build()
+                .post()
                 .uri(e -> e.path(usersEndpoint).build())
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
                 .body(BodyInserters.fromValue(keycloakUser))

@@ -14,14 +14,10 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.PostConstruct;
-
-// TODO : Add unit test
 @Component
 @Profile("!mock")
 public class KeycloakTokenClientImpl implements KeycloakTokenClient {
     private static final String ERROR_MESSAGE = "Could not get Keycloak access token";
-    private WebClient webClient;
 
     @Value("${keycloak.host}")
     private String host;
@@ -47,13 +43,6 @@ public class KeycloakTokenClientImpl implements KeycloakTokenClient {
     @Value("${keycloak.token.client.secret.value}")
     private String clientSecretValue;
 
-    @PostConstruct
-    public void postConstruct() {
-        this.webClient = WebClient.builder()
-                .baseUrl(host)
-                .build();
-    }
-
     @Override
     public String getKeycloakToken() {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -61,7 +50,9 @@ public class KeycloakTokenClientImpl implements KeycloakTokenClient {
         formData.add(clientIdKey, clientIdValue);
         formData.add(clientSecretKey, clientSecretValue);
 
-        return webClient
+        return WebClient.builder()
+                .baseUrl(host)
+                .build()
                 .post()
                 .uri(e -> e.path(tokenEndpoint).build())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
