@@ -23,10 +23,10 @@ public class CreateAccountService {
     // TODO : Add validation
     // TODO : Send email verification on success
     public void createAccount(CreateAccountRequest createAccountRequest) {
-        keycloakUserClient.createAccount(mapToKeycloakUser(createAccountRequest));
+        keycloakUserClient.createAccount(transformToKeycloakUser(createAccountRequest));
     }
 
-    private KeycloakUser mapToKeycloakUser(CreateAccountRequest createAccountRequest) {
+    private KeycloakUser transformToKeycloakUser(CreateAccountRequest createAccountRequest) {
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(VERIFICATION_CODE, Collections.singletonList(generateVerificationCode()));
 
