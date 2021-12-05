@@ -4,7 +4,6 @@ import com.demo.account.client.KeycloakTokenClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccessToken;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Component
-@Profile("!mock")
 public class KeycloakTokenClientImpl implements KeycloakTokenClient {
     private static final String ERROR_MESSAGE = "Could not get Keycloak access token";
 
