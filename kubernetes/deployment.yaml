@@ -24,10 +24,10 @@ spec:
             - name: KEYCLOAK_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: kitamoto-otomatik-email-service
+                  name: kitamoto-otomatik-user-service
                   key: KEYCLOAK_HOST
             - name: KEYCLOAK_TOKEN_CLIENT_SECRET_VALUE
               valueFrom:
                 configMapKeyRef:
-                  name: kitamoto-otomatik-email-service
+                  name: kitamoto-otomatik-user-service
                   key: KEYCLOAK_TOKEN_CLIENT_SECRET_VALUE
