@@ -39,31 +39,32 @@ public class KeycloakUserClient {
                 .build();
     }
 
-    public Mono<List<KeycloakUser>> getUserListByUsername(String username) {
-        return tokenService.getKeycloakToken().flatMap(token -> webClient
-                .get()
+    public List<KeycloakUser> getUserListByUsername(String username) {
+        return webClient.get()
                 .uri(e -> e.path(usersEndpoint).queryParam("username", username).build())
-                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
                 .retrieve()
                 .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(GET_ACCOUNT_ERROR_MESSAGE)))
                 .bodyToMono(KeycloakUser[].class)
                 .doOnError(e -> {
                     throw new KeycloakException(GET_ACCOUNT_ERROR_MESSAGE);
                 })
-                .map(Arrays::asList));
+                .map(Arrays::asList)
+                .block();
     }
 
-    public Mono<Void> createAccount(KeycloakUser keycloakUser) {
-        return tokenService.getKeycloakToken().flatMap(token -> webClient
-                .post()
+    // TODO : Handle existing username
+    public void createAccount(KeycloakUser keycloakUser) {
+        webClient.post()
                 .uri(e -> e.path(usersEndpoint).build())
-                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
                 .body(BodyInserters.fromValue(keycloakUser))
                 .retrieve()
                 .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(CREATE_ACCOUNT_ERROR_MESSAGE)))
                 .bodyToMono(Void.class)
                 .doOnError(e -> {
                     throw new KeycloakException(CREATE_ACCOUNT_ERROR_MESSAGE);
-                }));
+                })
+                .block();
     }
 }

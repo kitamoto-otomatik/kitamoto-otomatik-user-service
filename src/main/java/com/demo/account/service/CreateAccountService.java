@@ -6,10 +6,8 @@ import com.demo.account.model.Credential;
 import com.demo.account.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.function.Function;
 
 @Service
 public class CreateAccountService {
@@ -24,31 +22,27 @@ public class CreateAccountService {
 
     // TODO : Add validation
     // TODO : Send email verification on success
-    public Mono<Void> createAccount(Mono<CreateAccountRequest> createAccountRequestMono) {
-        return createAccountRequestMono
-                .map(mapToKeycloakUser())
-                .flatMap(keycloakUserClient::createAccount);
+    public void createAccount(CreateAccountRequest createAccountRequest) {
+        keycloakUserClient.createAccount(mapToKeycloakUser(createAccountRequest));
     }
 
-    private Function<CreateAccountRequest, KeycloakUser> mapToKeycloakUser() {
-        return createAccountRequest -> {
-            Map<String, List<String>> attributes = new HashMap<>();
-            attributes.put(VERIFICATION_CODE, Arrays.asList(generateVerificationCode()));
+    private KeycloakUser mapToKeycloakUser(CreateAccountRequest createAccountRequest) {
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(VERIFICATION_CODE, Collections.singletonList(generateVerificationCode()));
 
-            Credential credential = new Credential();
-            credential.setType(PASSWORD);
-            credential.setValue(createAccountRequest.getPassword());
-            credential.setTemporary(false);
+        Credential credential = new Credential();
+        credential.setType(PASSWORD);
+        credential.setValue(createAccountRequest.getPassword());
+        credential.setTemporary(false);
 
-            KeycloakUser keycloakUser = new KeycloakUser();
-            keycloakUser.setUsername(createAccountRequest.getUsername());
-            keycloakUser.setEmail(createAccountRequest.getUsername());
-            keycloakUser.setFirstName(createAccountRequest.getFirstName());
-            keycloakUser.setLastName(createAccountRequest.getLastName());
-            keycloakUser.setAttributes(attributes);
-            keycloakUser.setCredentials(Collections.singletonList(credential));
-            return keycloakUser;
-        };
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setUsername(createAccountRequest.getUsername());
+        keycloakUser.setEmail(createAccountRequest.getUsername());
+        keycloakUser.setFirstName(createAccountRequest.getFirstName());
+        keycloakUser.setLastName(createAccountRequest.getLastName());
+        keycloakUser.setAttributes(attributes);
+        keycloakUser.setCredentials(Collections.singletonList(credential));
+        return keycloakUser;
     }
 
     private String generateVerificationCode() {

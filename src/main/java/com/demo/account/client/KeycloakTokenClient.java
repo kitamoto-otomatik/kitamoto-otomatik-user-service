@@ -50,7 +50,7 @@ public class KeycloakTokenClient {
                 .build();
     }
 
-    public Mono<String> getKeycloakToken() {
+    public String getKeycloakToken() {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add(grantTypeKey, grantTypeValue);
         formData.add(clientIdKey, clientIdValue);
@@ -67,6 +67,7 @@ public class KeycloakTokenClient {
                 .doOnError(e -> {
                     throw new KeycloakException(ERROR_MESSAGE);
                 })
-                .map(AccessToken::getAccessToken);
+                .map(AccessToken::getAccessToken)
+                .block();
     }
 }
