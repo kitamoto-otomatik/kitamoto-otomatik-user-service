@@ -1,1 +1,0 @@
-Send email verification on successful registration
