@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 
+// TODO : Add unit test
 @Component
 public class KeycloakTokenClient {
     private static final String ERROR_MESSAGE = "Could not get Keycloak access token";

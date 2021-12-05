@@ -9,9 +9,15 @@ import com.demo.account.service.GetAccountStatusByUsernameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.stream.Collectors;
+
 // TODO : Add integration tests
+@Validated
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
@@ -26,10 +32,9 @@ public class AccountController {
         return new AccountStatusResponse(getAccountStatusByUsernameService.getAccountStatusByUsername(username));
     }
 
-    // TODO : Add request validation
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createAccount(@RequestBody CreateAccountRequest request) {
+    public void createAccount(@RequestBody @Valid CreateAccountRequest request) {
         createAccountService.createAccount(request);
     }
 
@@ -37,5 +42,19 @@ public class AccountController {
     @ExceptionHandler(KeycloakException.class)
     public HttpEntity<ErrorResponse> keycloakExceptionHandler(KeycloakException e) {
         return new HttpEntity<>(new ErrorResponse(e.getClass().getSimpleName(), e.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public HttpEntity<ErrorResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
+        return new HttpEntity<>(new ErrorResponse(e.getClass().getSimpleName(), getValidationErrors(e)));
+    }
+
+    public String getValidationErrors(MethodArgumentNotValidException e) {
+        return e.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
+                .sorted()
+                .collect(Collectors.joining(", "));
+
     }
 }

@@ -82,6 +82,25 @@ public class AccountControllerTest {
     }
 
     @Test
+    public void createAccount_whenRequestIsInvalid() throws Exception {
+        CreateAccountRequest request = new CreateAccountRequest();
+        request.setUsername("");
+        request.setPassword("");
+        request.setFirstName("");
+        request.setLastName("");
+
+        mockMvc.perform(post("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("MethodArgumentNotValidException"))
+                .andExpect(jsonPath("$.message").value("firstName must not be blank, lastName must not be blank, password must not be blank, username must not be blank"));
+
+        verifyNoInteractions(createAccountService);
+    }
+
+    @Test
     public void createAccount_whenException() throws Exception {
         doThrow(new KeycloakException("SOME ERROR")).when(createAccountService).createAccount(any(CreateAccountRequest.class));
 

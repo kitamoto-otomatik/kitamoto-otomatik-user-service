@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 
+// TODO : Add unit test
 @Component
 public class KeycloakUserClient {
     private static final String GET_ACCOUNT_ERROR_MESSAGE = "Could not get Keycloak users";

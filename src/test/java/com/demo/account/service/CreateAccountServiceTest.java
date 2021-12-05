@@ -1,9 +1,8 @@
-package com.demo.service;
+package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.KeycloakUser;
-import com.demo.account.service.CreateAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
