@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: kitamoto-otomatik-user-service
 data:
-  KEYCLOAK_HOST: "http://192.168.1.16:9002"
-  KEYCLOAK_TOKEN_CLIENT_SECRET_VALUE: "81aafc7d-275c-4a08-806e-37a056442173"
+  KEYCLOAK_HOST:
+  KEYCLOAK_TOKEN_CLIENT_SECRET_VALUE:
