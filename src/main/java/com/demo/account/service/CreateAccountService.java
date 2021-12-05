@@ -20,7 +20,6 @@ public class CreateAccountService {
         this.keycloakUserClient = keycloakUserClient;
     }
 
-    // TODO : Add validation
     // TODO : Send email verification on success
     public void createAccount(CreateAccountRequest createAccountRequest) {
         keycloakUserClient.createAccount(transformToKeycloakUser(createAccountRequest));

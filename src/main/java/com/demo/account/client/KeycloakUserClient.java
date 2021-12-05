@@ -1,6 +1,7 @@
 package com.demo.account.client;
 
 import com.demo.account.exception.KeycloakException;
+import com.demo.account.model.KeycloakErrorResponse;
 import com.demo.account.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,23 +49,22 @@ public class KeycloakUserClient {
                 .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(GET_ACCOUNT_ERROR_MESSAGE)))
                 .bodyToMono(KeycloakUser[].class)
                 .doOnError(e -> {
-                    throw new KeycloakException(GET_ACCOUNT_ERROR_MESSAGE);
+                    throw new KeycloakException(e.getMessage());
                 })
                 .map(Arrays::asList)
                 .block();
     }
 
-    // TODO : Handle existing username
     public void createAccount(KeycloakUser keycloakUser) {
         webClient.post()
                 .uri(e -> e.path(usersEndpoint).build())
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
                 .body(BodyInserters.fromValue(keycloakUser))
                 .retrieve()
-                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(CREATE_ACCOUNT_ERROR_MESSAGE)))
+                .onStatus(HttpStatus::isError, response -> response.bodyToMono(KeycloakErrorResponse.class).map(body -> new KeycloakException(body.getErrorMessage())))
                 .bodyToMono(Void.class)
                 .doOnError(e -> {
-                    throw new KeycloakException(CREATE_ACCOUNT_ERROR_MESSAGE);
+                    throw new KeycloakException(e.getMessage());
                 })
                 .block();
     }
