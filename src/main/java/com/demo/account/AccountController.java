@@ -4,6 +4,7 @@ import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatusResponse;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.ErrorResponse;
+import com.demo.account.service.AccountActivationEmailService;
 import com.demo.account.service.AccountActivationService;
 import com.demo.account.service.CreateAccountService;
 import com.demo.account.service.GetAccountStatusByUsernameService;
@@ -34,6 +35,9 @@ public class AccountController {
     @Autowired
     private AccountActivationService accountActivationService;
 
+    @Autowired
+    private AccountActivationEmailService accountActivationEmailService;
+
     @GetMapping("/{username}")
     public AccountStatusResponse getAccountStatusByUsername(@PathVariable String username) {
         return new AccountStatusResponse(getAccountStatusByUsernameService.getAccountStatusByUsername(username));
@@ -50,6 +54,12 @@ public class AccountController {
     public void activateAccount(@PathVariable @NotBlank String emailAddress,
                                 @RequestParam @NotBlank String activationCode) {
         accountActivationService.activateAccount(emailAddress, activationCode);
+    }
+
+    @PostMapping("/{username}/emailVerification")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void resendEmailVerification(@PathVariable @NotBlank String username) {
+        accountActivationEmailService.sendVerificationEmail(username);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
