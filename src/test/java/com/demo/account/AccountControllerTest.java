@@ -3,6 +3,7 @@ package com.demo.account;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
+import com.demo.account.service.AccountActivationService;
 import com.demo.account.service.CreateAccountService;
 import com.demo.account.service.GetAccountStatusByUsernameService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +34,9 @@ public class AccountControllerTest {
 
     @MockBean
     private CreateAccountService createAccountService;
+
+    @MockBean
+    private AccountActivationService accountActivationService;
 
     @BeforeEach
     public void setup() {
@@ -119,5 +123,37 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
         verify(createAccountService).createAccount(request);
+    }
+
+    @Test
+    public void activateAccount_whenOk() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+                .andExpect(status().isAccepted());
+
+        verify(accountActivationService).activateAccount("nikkinicholas.romero@gmail.com", "1234");
+    }
+
+    @Test
+    public void activateAccount_whenError() throws Exception {
+        doThrow(new KeycloakException("SOME ERROR")).when(accountActivationService).activateAccount(anyString(), anyString());
+
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("KeycloakException"))
+                .andExpect(jsonPath("$.message").value("SOME ERROR"));
+
+        verify(accountActivationService).activateAccount("nikkinicholas.romero@gmail.com", "1234");
+    }
+
+    @Test
+    public void activateAccount_whenInvalidRequest() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode="))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
+                .andExpect(jsonPath("$.message").value("activateAccount.activationCode: must not be blank"));
+
+        verifyNoInteractions(accountActivationService);
     }
 }

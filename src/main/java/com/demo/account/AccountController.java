@@ -4,6 +4,7 @@ import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatusResponse;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.ErrorResponse;
+import com.demo.account.service.AccountActivationService;
 import com.demo.account.service.CreateAccountService;
 import com.demo.account.service.GetAccountStatusByUsernameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.stream.Collectors;
 
 @Validated
@@ -26,6 +31,9 @@ public class AccountController {
     @Autowired
     private CreateAccountService createAccountService;
 
+    @Autowired
+    private AccountActivationService accountActivationService;
+
     @GetMapping("/{username}")
     public AccountStatusResponse getAccountStatusByUsername(@PathVariable String username) {
         return new AccountStatusResponse(getAccountStatusByUsernameService.getAccountStatusByUsername(username));
@@ -37,9 +45,21 @@ public class AccountController {
         createAccountService.createAccount(request);
     }
 
+    @PostMapping("/{emailAddress}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void activateAccount(@PathVariable @NotBlank String emailAddress,
+                                @RequestParam @NotBlank String activationCode) {
+        accountActivationService.activateAccount(emailAddress, activationCode);
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(KeycloakException.class)
-    public HttpEntity<ErrorResponse> keycloakExceptionHandler(KeycloakException e) {
+    @ExceptionHandler({
+            KeycloakException.class,
+            MissingPathVariableException.class,
+            MissingServletRequestParameterException.class,
+            ConstraintViolationException.class
+    })
+    public HttpEntity<ErrorResponse> exceptionHandler(Exception e) {
         return new HttpEntity<>(new ErrorResponse(e.getClass().getSimpleName(), e.getMessage()));
     }
 

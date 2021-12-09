@@ -2,6 +2,7 @@ package com.demo.account.client.impl;
 
 import com.demo.account.client.KeycloakTokenClient;
 import com.demo.account.exception.KeycloakException;
+import com.demo.account.model.AccountActivationRequest;
 import com.demo.account.model.Credential;
 import com.demo.account.model.KeycloakErrorResponse;
 import com.demo.account.model.KeycloakUser;
@@ -156,6 +157,49 @@ public class KeycloakUserClientTest {
         assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT);
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
         assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), KeycloakUser.class)).isEqualTo(keycloakUser);
+
+        verify(tokenService).getKeycloakToken();
+    }
+
+    @Test
+    public void activateAccount_whenOk() throws InterruptedException, JsonProcessingException {
+        mockBackEnd.enqueue(new MockResponse());
+        AccountActivationRequest accountActivationRequest = new AccountActivationRequest();
+        accountActivationRequest.setEmailVerified(true);
+        accountActivationRequest.setEnabled(true);
+        target.activateAccount("someId", accountActivationRequest);
+
+        RecordedRequest recordedRequest = mockBackEnd.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
+        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT + "/someId");
+        assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), AccountActivationRequest.class)).isEqualTo(accountActivationRequest);
+
+        verify(tokenService).getKeycloakToken();
+    }
+
+    @Test
+    public void activateAccount_whenError() throws InterruptedException, JsonProcessingException {
+        KeycloakErrorResponse keycloakErrorResponse = new KeycloakErrorResponse();
+        keycloakErrorResponse.setErrorMessage("User does not exist");
+
+        MockResponse mockResponse = new MockResponse()
+                .setBody(objectMapper.writeValueAsString(keycloakErrorResponse))
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        mockResponse.status("HTTP/1.1 500 Internal Server Error");
+        mockBackEnd.enqueue(mockResponse);
+
+        AccountActivationRequest accountActivationRequest = new AccountActivationRequest();
+        accountActivationRequest.setEmailVerified(true);
+        accountActivationRequest.setEnabled(true);
+        KeycloakException e = assertThrows(KeycloakException.class, () -> target.activateAccount("someId", accountActivationRequest));
+        assertThat(e.getMessage()).isEqualTo("User does not exist");
+
+        RecordedRequest recordedRequest = mockBackEnd.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
+        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT + "/someId");
+        assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), AccountActivationRequest.class)).isEqualTo(accountActivationRequest);
 
         verify(tokenService).getKeycloakToken();
     }

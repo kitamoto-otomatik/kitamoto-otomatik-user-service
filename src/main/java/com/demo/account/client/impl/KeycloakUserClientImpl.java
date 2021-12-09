@@ -3,6 +3,7 @@ package com.demo.account.client.impl;
 import com.demo.account.client.KeycloakTokenClient;
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.KeycloakException;
+import com.demo.account.model.AccountActivationRequest;
 import com.demo.account.model.KeycloakErrorResponse;
 import com.demo.account.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,24 @@ public class KeycloakUserClientImpl implements KeycloakUserClient {
                 .uri(e -> e.path(usersEndpoint).build())
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
                 .body(BodyInserters.fromValue(keycloakUser))
+                .retrieve()
+                .onStatus(HttpStatus::isError, response -> response.bodyToMono(KeycloakErrorResponse.class).map(body -> new KeycloakException(body.getErrorMessage())))
+                .bodyToMono(Void.class)
+                .doOnError(e -> {
+                    throw new KeycloakException(e.getMessage());
+                })
+                .block();
+    }
+
+    @Override
+    public void activateAccount(String id, AccountActivationRequest accountActivationRequest) {
+        WebClient.builder()
+                .baseUrl(host)
+                .build()
+                .put()
+                .uri(e -> e.path(usersEndpoint + "/" + id).build())
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenService.getKeycloakToken()))
+                .body(BodyInserters.fromValue(accountActivationRequest))
                 .retrieve()
                 .onStatus(HttpStatus::isError, response -> response.bodyToMono(KeycloakErrorResponse.class).map(body -> new KeycloakException(body.getErrorMessage())))
                 .bodyToMono(Void.class)

@@ -45,4 +45,10 @@ public class AccountControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
     }
+
+    @Test
+    public void activateAccount() throws Exception {
+        this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+                .andExpect(status().isAccepted());
+    }
 }
