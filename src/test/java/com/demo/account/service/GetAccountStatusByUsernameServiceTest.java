@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.demo.ErrorMessage.NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,7 +54,7 @@ public class GetAccountStatusByUsernameServiceTest {
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
         KeycloakException keycloakException = assertThrows(KeycloakException.class, () -> target.getAccountStatusByUsername("nikkinicholas.romero@gmail.com"));
-        assertThat(keycloakException.getMessage()).isEqualTo("Found multiple users with the same username");
+        assertThat(keycloakException.getMessage()).isEqualTo(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
     }
 

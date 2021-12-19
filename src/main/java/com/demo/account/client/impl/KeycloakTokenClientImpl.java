@@ -3,6 +3,7 @@ package com.demo.account.client.impl;
 import com.demo.account.client.KeycloakTokenClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccessToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,17 +12,17 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
+import static com.demo.ErrorMessage.KEYCLOAK_TOKEN_ERROR_MESSAGE;
+
+@Slf4j
 @Component
 public class KeycloakTokenClientImpl implements KeycloakTokenClient {
-    private static final String ERROR_MESSAGE = "Could not get Keycloak access token";
-
     @Value("${keycloak.host}")
     private String host;
 
     @Value("${keycloak.token.endpoint}")
-    private String tokenEndpoint;
+    private String endpoint;
 
     @Value("${keycloak.token.grant.type.key}")
     private String grantTypeKey;
@@ -52,14 +53,17 @@ public class KeycloakTokenClientImpl implements KeycloakTokenClient {
                 .baseUrl(host)
                 .build()
                 .post()
-                .uri(e -> e.path(tokenEndpoint).build())
+                .uri(e -> e.path(endpoint).build())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
-                .onStatus(HttpStatus::isError, response -> Mono.error(new KeycloakException(ERROR_MESSAGE)))
+                .onStatus(HttpStatus::isError, response -> response
+                        .createException()
+                        .map(e -> new RuntimeException(e.getResponseBodyAsString())))
                 .bodyToMono(AccessToken.class)
                 .doOnError(e -> {
-                    throw new KeycloakException(ERROR_MESSAGE);
+                    log.error(KEYCLOAK_TOKEN_ERROR_MESSAGE, e);
+                    throw new KeycloakException(KEYCLOAK_TOKEN_ERROR_MESSAGE);
                 })
                 .map(AccessToken::getAccessToken)
                 .block();

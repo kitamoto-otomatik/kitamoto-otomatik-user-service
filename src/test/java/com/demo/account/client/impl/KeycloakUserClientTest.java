@@ -24,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.IOException;
 import java.util.*;
 
+import static com.demo.ErrorMessage.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.when;
 
 public class KeycloakUserClientTest {
     private static final String HOST = "http://localhost";
-    private static final String USERS_ENDPOINT = "/users";
+    private static final String ENDPOINT = "/users";
 
     private MockWebServer mockBackEnd;
 
@@ -55,7 +56,7 @@ public class KeycloakUserClientTest {
         MockitoAnnotations.openMocks(this);
 
         ReflectionTestUtils.setField(target, "host", HOST + ":" + mockBackEnd.getPort());
-        ReflectionTestUtils.setField(target, "usersEndpoint", USERS_ENDPOINT);
+        ReflectionTestUtils.setField(target, "endpoint", ENDPOINT);
 
         when(tokenService.getKeycloakToken()).thenReturn("someAccessToken");
 
@@ -100,7 +101,7 @@ public class KeycloakUserClientTest {
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
-        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT + "?username=nikkinicholas.romero@gmail.com");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "?username=nikkinicholas.romero@gmail.com");
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
 
         verify(tokenService).getKeycloakToken();
@@ -113,11 +114,11 @@ public class KeycloakUserClientTest {
         mockBackEnd.enqueue(mockResponse);
 
         KeycloakException e = assertThrows(KeycloakException.class, () -> target.getUserListByUsername("nikkinicholas.romero@gmail.com"));
-        assertThat(e.getMessage()).isEqualTo("Could not get Keycloak users");
+        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_GET_USER_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
-        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT + "?username=nikkinicholas.romero@gmail.com");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "?username=nikkinicholas.romero@gmail.com");
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
 
         verify(tokenService).getKeycloakToken();
@@ -131,7 +132,7 @@ public class KeycloakUserClientTest {
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("POST");
-        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT);
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT);
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
         assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), KeycloakUser.class)).isEqualTo(keycloakUser);
 
@@ -150,11 +151,11 @@ public class KeycloakUserClientTest {
         mockBackEnd.enqueue(mockResponse);
 
         KeycloakException e = assertThrows(KeycloakException.class, () -> target.createAccount(keycloakUser));
-        assertThat(e.getMessage()).isEqualTo("User already exists");
+        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_CREATION_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("POST");
-        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT);
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT);
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
         assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), KeycloakUser.class)).isEqualTo(keycloakUser);
 
@@ -171,7 +172,7 @@ public class KeycloakUserClientTest {
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
-        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT + "/someId");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "/someId");
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
         assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), AccountActivationRequest.class)).isEqualTo(accountActivationRequest);
 
@@ -193,11 +194,11 @@ public class KeycloakUserClientTest {
         accountActivationRequest.setEmailVerified(true);
         accountActivationRequest.setEnabled(true);
         KeycloakException e = assertThrows(KeycloakException.class, () -> target.activateAccount("someId", accountActivationRequest));
-        assertThat(e.getMessage()).isEqualTo("User does not exist");
+        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_ACTIVATION_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
-        assertThat(recordedRequest.getPath()).isEqualTo(USERS_ENDPOINT + "/someId");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "/someId");
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
         assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), AccountActivationRequest.class)).isEqualTo(accountActivationRequest);
 

@@ -17,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 
+import static com.demo.ErrorMessage.EMAIL_SENDING_ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -81,7 +82,7 @@ public class MailClientImplTest {
         mockBackEnd.enqueue(mockResponse);
 
         MailException e = assertThrows(MailException.class, () -> target.sendEmail(mail));
-        assertThat(e.getMessage()).isEqualTo("Could not send email");
+        assertThat(e.getMessage()).isEqualTo(EMAIL_SENDING_ERROR);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");

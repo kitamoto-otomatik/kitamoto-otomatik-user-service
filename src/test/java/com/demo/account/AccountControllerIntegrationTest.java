@@ -28,7 +28,7 @@ public class AccountControllerIntegrationTest {
     public void getAccountStatusByUsername() throws Exception {
         this.mockMvc.perform(get("/accounts/nikkinicholas.romero@gmail.com"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.status").value("UNVERIFIED"))
                 .andExpect(status().isOk());
     }
 
@@ -49,6 +49,12 @@ public class AccountControllerIntegrationTest {
     @Test
     public void activateAccount() throws Exception {
         this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+                .andExpect(status().isAccepted());
+    }
+
+    @Test
+    public void resendActivationCode() throws Exception {
+        this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
                 .andExpect(status().isAccepted());
     }
 }

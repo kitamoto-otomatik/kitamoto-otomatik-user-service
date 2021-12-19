@@ -1,39 +1,51 @@
 package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
+import com.demo.account.exception.RequestException;
+import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.Credential;
 import com.demo.account.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static com.demo.ErrorMessage.USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE;
+
 @Service
 public class CreateAccountService {
-    private static final String VERIFICATION_CODE = "verificationCode";
-    private static final String PASSWORD = "password";
-    private final KeycloakUserClient keycloakUserClient;
-    private final AccountActivationEmailService accountActivationEmailService;
+    @Value("${account.activation.code}")
+    private String code;
 
     @Autowired
-    public CreateAccountService(KeycloakUserClient keycloakUserClient, AccountActivationEmailService accountActivationEmailService) {
-        this.keycloakUserClient = keycloakUserClient;
-        this.accountActivationEmailService = accountActivationEmailService;
-    }
+    private GetAccountStatusByUsernameService getAccountStatusByUsernameService;
+
+    @Autowired
+    private KeycloakUserClient keycloakUserClient;
+
+    @Autowired
+    private AccountActivationEmailService accountActivationEmailService;
 
     public void createAccount(CreateAccountRequest createAccountRequest) {
-        KeycloakUser keycloakUser = transformToKeycloakUser(createAccountRequest);
+        AccountStatus accountStatus = getAccountStatusByUsernameService.getAccountStatusByUsername(createAccountRequest.getUsername());
+        if (accountStatus != AccountStatus.UNREGISTERED) {
+            throw new RequestException(USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE);
+        }
+
+        String activationCode = String.valueOf(new Random().nextInt(1_000_000));
+        KeycloakUser keycloakUser = transformToKeycloakUser(createAccountRequest, activationCode);
         keycloakUserClient.createAccount(keycloakUser);
-        accountActivationEmailService.sendVerificationEmail(createAccountRequest.getUsername(), keycloakUser.getAttributes().get(VERIFICATION_CODE).get(0));
+        accountActivationEmailService.sendActivationCode(createAccountRequest.getUsername(), activationCode);
     }
 
-    private KeycloakUser transformToKeycloakUser(CreateAccountRequest createAccountRequest) {
+    private KeycloakUser transformToKeycloakUser(CreateAccountRequest createAccountRequest, String activationCode) {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(VERIFICATION_CODE, Collections.singletonList(generateVerificationCode()));
+        attributes.put(code, Collections.singletonList(activationCode));
 
         Credential credential = new Credential();
-        credential.setType(PASSWORD);
+        credential.setType("password");
         credential.setValue(createAccountRequest.getPassword());
         credential.setTemporary(false);
 
@@ -45,10 +57,5 @@ public class CreateAccountService {
         keycloakUser.setAttributes(attributes);
         keycloakUser.setCredentials(Collections.singletonList(credential));
         return keycloakUser;
-    }
-
-    private String generateVerificationCode() {
-        Random random = new Random();
-        return String.valueOf(random.nextInt(1_000_000));
     }
 }

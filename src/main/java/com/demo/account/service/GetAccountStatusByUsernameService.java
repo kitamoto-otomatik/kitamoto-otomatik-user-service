@@ -4,22 +4,20 @@ import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.KeycloakUser;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.demo.ErrorMessage.NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE;
+
+@Slf4j
 @Service
 public class GetAccountStatusByUsernameService {
-    private static final String ERROR_MESSAGE = "Found multiple users with the same username";
-
-    private final KeycloakUserClient keycloakUserClient;
-
     @Autowired
-    public GetAccountStatusByUsernameService(KeycloakUserClient keycloakUserClient) {
-        this.keycloakUserClient = keycloakUserClient;
-    }
+    private KeycloakUserClient keycloakUserClient;
 
     public AccountStatus getAccountStatusByUsername(String username) {
         List<KeycloakUser> keycloakUserList = keycloakUserClient.getUserListByUsername(username);
@@ -28,7 +26,8 @@ public class GetAccountStatusByUsernameService {
         if (CollectionUtils.isEmpty(keycloakUserList)) {
             return AccountStatus.UNREGISTERED;
         } else if (keycloakUserList.size() > 1) {
-            throw new KeycloakException(ERROR_MESSAGE);
+            log.error("{} - {}", NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE, username);
+            throw new KeycloakException(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
         } else if (keycloakUserList.get(0).isEmailVerified()) {
             return AccountStatus.ACTIVE;
         } else {

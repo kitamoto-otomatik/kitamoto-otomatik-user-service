@@ -3,6 +3,7 @@ package com.demo.account.client.impl;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.MailException;
 import com.demo.account.model.Mail;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -10,13 +11,13 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
+import static com.demo.ErrorMessage.EMAIL_SENDING_ERROR;
+
+@Slf4j
 @Component
 @Profile("!mock")
 public class MailClientImpl implements MailClient {
-    private static final String ERROR_MESSAGE = "Could not send email";
-
     @Value("${mail.host}")
     private String host;
 
@@ -33,10 +34,13 @@ public class MailClientImpl implements MailClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(mail))
                 .retrieve()
-                .onStatus(HttpStatus::isError, response -> Mono.error(new MailException(ERROR_MESSAGE)))
+                .onStatus(HttpStatus::isError, response -> response
+                        .createException()
+                        .map(e -> new RuntimeException(e.getResponseBodyAsString())))
                 .bodyToMono(Void.class)
                 .doOnError(e -> {
-                    throw new MailException(e.getMessage());
+                    log.error(EMAIL_SENDING_ERROR, e);
+                    throw new MailException(EMAIL_SENDING_ERROR);
                 })
                 .block();
     }

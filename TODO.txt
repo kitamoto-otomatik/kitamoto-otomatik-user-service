@@ -1,4 +1,3 @@
-resend verification unit tests
 forgot password
 reset password
 login

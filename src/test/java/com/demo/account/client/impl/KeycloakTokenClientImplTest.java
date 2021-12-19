@@ -18,12 +18,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 
+import static com.demo.ErrorMessage.KEYCLOAK_TOKEN_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class KeycloakTokenClientTest {
+public class KeycloakTokenClientImplTest {
     private static final String HOST = "http://localhost";
-    private static final String TOKEN_ENDPOINT = "/token";
+    private static final String ENDPOINT = "/token";
     private static final String GRANT_TYPE_KEY = "someGrantType";
     private static final String GRANT_TYPE_VALUE = "someGrantTypeValue";
     private static final String CLIENT_ID_KEY = "someClientIdKey";
@@ -48,7 +49,7 @@ public class KeycloakTokenClientTest {
         MockitoAnnotations.openMocks(this);
 
         ReflectionTestUtils.setField(target, "host", HOST + ":" + mockBackEnd.getPort());
-        ReflectionTestUtils.setField(target, "tokenEndpoint", TOKEN_ENDPOINT);
+        ReflectionTestUtils.setField(target, "endpoint", ENDPOINT);
         ReflectionTestUtils.setField(target, "grantTypeKey", GRANT_TYPE_KEY);
         ReflectionTestUtils.setField(target, "grantTypeValue", GRANT_TYPE_VALUE);
         ReflectionTestUtils.setField(target, "clientIdKey", CLIENT_ID_KEY);
@@ -73,7 +74,7 @@ public class KeycloakTokenClientTest {
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("POST");
-        assertThat(recordedRequest.getPath()).isEqualTo(TOKEN_ENDPOINT);
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT);
         assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("someGrantType=someGrantTypeValue&someClientIdKey=someClientIdKeyValue&someClientSecretKey=someClientSecretKeyValue");
     }
 
@@ -84,11 +85,11 @@ public class KeycloakTokenClientTest {
         mockBackEnd.enqueue(mockResponse);
 
         KeycloakException e = assertThrows(KeycloakException.class, () -> target.getKeycloakToken());
-        assertThat(e.getMessage()).isEqualTo("Could not get Keycloak access token");
+        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_TOKEN_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("POST");
-        assertThat(recordedRequest.getPath()).isEqualTo(TOKEN_ENDPOINT);
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT);
         assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("someGrantType=someGrantTypeValue&someClientIdKey=someClientIdKeyValue&someClientSecretKey=someClientSecretKeyValue");
     }
 }
