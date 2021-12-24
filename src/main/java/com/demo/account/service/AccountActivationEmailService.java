@@ -4,10 +4,7 @@ import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.KeycloakUser;
-import com.demo.account.model.Mail;
-import com.demo.account.model.AccountActivationTemplateVariables;
-import com.demo.account.model.TemplateVariables;
+import com.demo.account.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 import static com.demo.ErrorMessage.*;
 
@@ -59,8 +56,18 @@ public class AccountActivationEmailService {
         } else if (keycloakUserList.get(0).isEmailVerified()) {
             throw new RequestException(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
         } else {
+            String activationCode = String.valueOf(new Random().nextInt(1_000_000));
+            resetActivationCode(keycloakUserList.get(0).getId(), activationCode);
             sendActivationCode(username, keycloakUserList.get(0).getAttributes().get(code).get(0));
         }
+    }
+
+    private void resetActivationCode(String id, String activationCode) {
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(code, Collections.singletonList(activationCode));
+        KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
+        keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
+        keycloakUserClient.updateKeycloakAccountAttribute(id, keycloakAccountAttributeUpdateRequest);
     }
 
     @Async

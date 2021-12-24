@@ -2,10 +2,7 @@ package com.demo.account.client.impl;
 
 import com.demo.account.client.KeycloakTokenClient;
 import com.demo.account.exception.KeycloakException;
-import com.demo.account.model.AccountActivationRequest;
-import com.demo.account.model.Credential;
-import com.demo.account.model.KeycloakErrorResponse;
-import com.demo.account.model.KeycloakUser;
+import com.demo.account.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
@@ -30,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class KeycloakUserClientTest {
+public class KeycloakUserClientImplTest {
     private static final String HOST = "http://localhost";
     private static final String ENDPOINT = "/users";
 
@@ -201,6 +198,51 @@ public class KeycloakUserClientTest {
         assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "/someId");
         assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
         assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), AccountActivationRequest.class)).isEqualTo(accountActivationRequest);
+
+        verify(tokenService).getKeycloakToken();
+    }
+
+    @Test
+    public void updateKeycloakAccountAttribute_whenOk() throws InterruptedException, JsonProcessingException {
+        mockBackEnd.enqueue(new MockResponse());
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("activationCode", Collections.singletonList("1234"));
+        KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
+        keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
+        target.updateKeycloakAccountAttribute("someId", keycloakAccountAttributeUpdateRequest);
+
+        RecordedRequest recordedRequest = mockBackEnd.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "/someId");
+        assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), KeycloakAccountAttributeUpdateRequest.class)).isEqualTo(keycloakAccountAttributeUpdateRequest);
+
+        verify(tokenService).getKeycloakToken();
+    }
+
+    @Test
+    public void updateKeycloakAccountAttribute_whenError() throws InterruptedException, JsonProcessingException {
+        KeycloakErrorResponse keycloakErrorResponse = new KeycloakErrorResponse();
+        keycloakErrorResponse.setErrorMessage("User does not exist");
+
+        MockResponse mockResponse = new MockResponse()
+                .setBody(objectMapper.writeValueAsString(keycloakErrorResponse))
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        mockResponse.status("HTTP/1.1 500 Internal Server Error");
+        mockBackEnd.enqueue(mockResponse);
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("activationCode", Collections.singletonList("1234"));
+        KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
+        keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
+        KeycloakException e = assertThrows(KeycloakException.class, () -> target.updateKeycloakAccountAttribute("someId", keycloakAccountAttributeUpdateRequest));
+        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_UPDATE_ERROR_MESSAGE);
+
+        RecordedRequest recordedRequest = mockBackEnd.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "/someId");
+        assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), KeycloakAccountAttributeUpdateRequest.class)).isEqualTo(keycloakAccountAttributeUpdateRequest);
 
         verify(tokenService).getKeycloakToken();
     }

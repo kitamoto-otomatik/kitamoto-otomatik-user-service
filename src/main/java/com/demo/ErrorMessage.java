@@ -4,6 +4,7 @@ public class ErrorMessage {
     public static final String KEYCLOAK_TOKEN_ERROR_MESSAGE = "An error was encountered while trying to get a Keycloak access token. ";
     public static final String KEYCLOAK_GET_USER_ERROR_MESSAGE = "An error was encountered while trying get an account. ";
     public static final String KEYCLOAK_USER_CREATION_ERROR_MESSAGE = "An error was encountered while trying create an account. ";
+    public static final String KEYCLOAK_USER_UPDATE_ERROR_MESSAGE = "An error was encountered while trying to update an account. ";
     public static final String KEYCLOAK_USER_ACTIVATION_ERROR_MESSAGE = "An error was encountered while trying activate an account. ";
     public static final String EMAIL_SENDING_ERROR = "An error was encountered while trying to send an email. ";
     public static final String NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE = "Multiple users with the same username was found. ";

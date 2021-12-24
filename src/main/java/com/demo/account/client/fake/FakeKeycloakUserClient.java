@@ -2,6 +2,7 @@ package com.demo.account.client.fake;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.model.AccountActivationRequest;
+import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
 import com.demo.account.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -35,5 +36,9 @@ public class FakeKeycloakUserClient implements KeycloakUserClient {
 
     @Override
     public void activateAccount(String id, AccountActivationRequest accountActivationRequest) {
+    }
+
+    @Override
+    public void updateKeycloakAccountAttribute(String id, KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest) {
     }
 }
