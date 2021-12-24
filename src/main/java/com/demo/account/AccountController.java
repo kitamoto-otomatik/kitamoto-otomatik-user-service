@@ -6,10 +6,7 @@ import com.demo.account.exception.RequestException;
 import com.demo.account.model.AccountStatusResponse;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.ErrorResponse;
-import com.demo.account.service.AccountActivationEmailService;
-import com.demo.account.service.AccountActivationService;
-import com.demo.account.service.CreateAccountService;
-import com.demo.account.service.GetAccountStatusByUsernameService;
+import com.demo.account.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -43,6 +40,9 @@ public class AccountController {
     @Autowired
     private AccountActivationEmailService activationEmailService;
 
+    @Autowired
+    private ForgotPasswordService forgotPasswordService;
+
     @GetMapping("/{username}")
     public AccountStatusResponse getAccountStatusByUsername(@PathVariable @Email String username) {
         log.info("getAccountStatusByUsername {}", username);
@@ -58,7 +58,7 @@ public class AccountController {
 
     @PostMapping("/{username}/resendActivationCode")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void resendActivationCode(@PathVariable @NotBlank String username) {
+    public void resendActivationCode(@PathVariable @NotBlank @Email String username) {
         log.info("resendActivationCode {}", username);
         activationEmailService.resendActivationCode(username);
     }
@@ -69,6 +69,13 @@ public class AccountController {
                                 @RequestParam @NotBlank String activationCode) {
         log.info("activateAccount {} - {}", username, activationCode);
         accountActivationService.activateAccount(username, activationCode);
+    }
+
+    @PostMapping("/{username}/password/forgot")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void forgotPassword(@PathVariable @NotBlank @Email String username) {
+        log.info("forgotPassword {}", username);
+        forgotPasswordService.forgotPassword(username);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -3,10 +3,7 @@ package com.demo.account;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
-import com.demo.account.service.AccountActivationEmailService;
-import com.demo.account.service.AccountActivationService;
-import com.demo.account.service.CreateAccountService;
-import com.demo.account.service.GetAccountStatusByUsernameService;
+import com.demo.account.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +38,9 @@ public class AccountControllerTest {
 
     @MockBean
     private AccountActivationEmailService activationEmailService;
+
+    @MockBean
+    private ForgotPasswordService forgotPasswordService;
 
     @BeforeEach
     public void setup() {
@@ -152,6 +152,17 @@ public class AccountControllerTest {
     }
 
     @Test
+    public void resendActivationCode_whenInvalid() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero/resendActivationCode"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
+                .andExpect(jsonPath("$.message").value("resendActivationCode.username: must be a well-formed email address"));
+
+        verifyNoInteractions(activationEmailService);
+    }
+
+    @Test
     public void resendActivationCode_whenError() throws Exception {
         doThrow(new KeycloakException("SOME ERROR")).when(activationEmailService).resendActivationCode(anyString());
 
@@ -162,6 +173,38 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
         verify(activationEmailService).resendActivationCode("nikkinicholas.romero@gmail.com");
+    }
+
+    @Test
+    public void forgotPassword_whenOk() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/password/forgot"))
+                .andExpect(status().isAccepted());
+
+        verify(forgotPasswordService).forgotPassword("nikkinicholas.romero@gmail.com");
+    }
+
+    @Test
+    public void forgotPassword_whenInvalid() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero/password/forgot"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
+                .andExpect(jsonPath("$.message").value("forgotPassword.username: must be a well-formed email address"));
+
+        verifyNoInteractions(forgotPasswordService);
+    }
+
+    @Test
+    public void forgotPassword_whenError() throws Exception {
+        doThrow(new KeycloakException("SOME ERROR")).when(forgotPasswordService).forgotPassword(anyString());
+
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/password/forgot"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("KeycloakException"))
+                .andExpect(jsonPath("$.message").value("SOME ERROR"));
+
+        verify(forgotPasswordService).forgotPassword("nikkinicholas.romero@gmail.com");
     }
 
     @Test

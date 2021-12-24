@@ -12,4 +12,5 @@ public class ErrorMessage {
     public static final String USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE = "Username is already taken. ";
     public static final String ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE = "Account is already activated. ";
     public static final String ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE = "Activation code is incorrect. ";
+    public static final String ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE = "Account is not yet activated. ";
 }

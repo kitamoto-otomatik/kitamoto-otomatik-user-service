@@ -22,8 +22,13 @@ public class FakeKeycloakUserClient implements KeycloakUserClient {
         attributes.put(code, Collections.singletonList("1234"));
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setEmailVerified(false);
+        if ("nikkinicholas.romero@gmail.com".equals(username)) {
+            keycloakUser1.setUsername(username);
+            keycloakUser1.setEmailVerified(false);
+        } else if ("sayin.leslieanne@gmail.com".equals(username)){
+            keycloakUser1.setUsername(username);
+            keycloakUser1.setEmailVerified(true);
+        }
         keycloakUser1.setAttributes(attributes);
         List<KeycloakUser> keycloakUserList = new ArrayList<>();
         keycloakUserList.add(keycloakUser1);

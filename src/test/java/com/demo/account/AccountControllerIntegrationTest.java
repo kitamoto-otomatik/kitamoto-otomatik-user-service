@@ -57,4 +57,10 @@ public class AccountControllerIntegrationTest {
         this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
                 .andExpect(status().isAccepted());
     }
+
+    @Test
+    public void forgotPassword() throws Exception {
+        this.mockMvc.perform(post("/accounts/sayin.leslieanne@gmail.com/password/forgot"))
+                .andExpect(status().isAccepted());
+    }
 }
