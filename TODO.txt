@@ -2,3 +2,13 @@ forgot password
 reset password
 login
 move URLs to configMaps
+change password
+
+- configurability
+- allow registration?
+- require account activation?
+- consecutive activation failure?
+- activation expiration?
+- reset password expiration?
+- consecutive reset password failure?
+- consecutive login failure
