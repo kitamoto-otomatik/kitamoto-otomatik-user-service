@@ -35,7 +35,7 @@ public class AccountControllerIntegrationTest {
     @Test
     public void createAccount() throws Exception {
         CreateAccountRequest request = new CreateAccountRequest();
-        request.setUsername("someUsername");
+        request.setUsername("someUsername@email.com");
         request.setPassword("somePassword");
         request.setFirstName("someFirstname");
         request.setLastName("someLastname");

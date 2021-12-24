@@ -3,6 +3,7 @@ package com.demo.account.client.impl;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.MailException;
 import com.demo.account.model.Mail;
+import com.demo.account.model.TemplateVariables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -17,7 +18,7 @@ import static com.demo.ErrorMessage.EMAIL_SENDING_ERROR;
 @Slf4j
 @Component
 @Profile("!mock")
-public class MailClientImpl implements MailClient {
+public class MailClientImpl<T extends TemplateVariables> implements MailClient<T> {
     @Value("${mail.host}")
     private String host;
 
@@ -25,7 +26,7 @@ public class MailClientImpl implements MailClient {
     private String endpoint;
 
     @Override
-    public void sendEmail(Mail mail) {
+    public void sendEmail(Mail<T> mail) {
         WebClient.builder()
                 .baseUrl(host)
                 .build()

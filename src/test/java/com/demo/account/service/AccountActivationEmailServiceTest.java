@@ -4,8 +4,10 @@ import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.exception.RequestException;
+import com.demo.account.model.AccountActivationTemplateVariables;
 import com.demo.account.model.KeycloakUser;
 import com.demo.account.model.Mail;
+import com.demo.account.model.TemplateVariables;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -33,13 +35,13 @@ public class AccountActivationEmailServiceTest {
     private AccountActivationEmailService target;
 
     @Mock
-    private MailClient mailClient;
+    private MailClient<AccountActivationTemplateVariables> mailClient;
 
     @Mock
     private KeycloakUserClient keycloakUserClient;
 
     @Captor
-    private ArgumentCaptor<Mail> mailArgumentCaptor;
+    private ArgumentCaptor<Mail<AccountActivationTemplateVariables>> mailArgumentCaptor;
 
     @BeforeEach
     public void setup() {
@@ -69,9 +71,8 @@ public class AccountActivationEmailServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        RequestException e = assertThrows(RequestException.class, () -> {
-            target.resendActivationCode("non-existent@gmail.com");
-        });
+        RequestException e = assertThrows(RequestException.class, () ->
+                target.resendActivationCode("non-existent@gmail.com"));
         assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         verify(keycloakUserClient).getUserListByUsername("non-existent@gmail.com");
         verifyNoInteractions(mailClient);
@@ -93,9 +94,9 @@ public class AccountActivationEmailServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        KeycloakException e = assertThrows(KeycloakException.class, () -> {
-            target.resendActivationCode("nikkinicholas.romero@gmail.com");
-        });
+        KeycloakException e = assertThrows(KeycloakException.class, () ->
+            target.resendActivationCode("nikkinicholas.romero@gmail.com")
+        );
         assertThat(e.getMessage()).isEqualTo(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
         verifyNoInteractions(mailClient);
@@ -118,9 +119,9 @@ public class AccountActivationEmailServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        RequestException e = assertThrows(RequestException.class, () -> {
-            target.resendActivationCode("nikkinicholas.romero@gmail.com");
-        });
+        RequestException e = assertThrows(RequestException.class, () ->
+            target.resendActivationCode("nikkinicholas.romero@gmail.com")
+        );
         assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
         verifyNoInteractions(mailClient);
@@ -146,7 +147,7 @@ public class AccountActivationEmailServiceTest {
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
         verify(mailClient).sendEmail(mailArgumentCaptor.capture());
-        Mail mail = mailArgumentCaptor.getValue();
+        Mail<AccountActivationTemplateVariables> mail = mailArgumentCaptor.getValue();
         assertThat(mail).isNotNull();
         assertThat(mail.getFrom()).isEqualTo(SENDER);
         assertThat(mail.getTo()).isEqualTo("nikkinicholas.romero@gmail.com");
@@ -163,7 +164,7 @@ public class AccountActivationEmailServiceTest {
 
         verifyNoInteractions(keycloakUserClient);
         verify(mailClient).sendEmail(mailArgumentCaptor.capture());
-        Mail mail = mailArgumentCaptor.getValue();
+        Mail<AccountActivationTemplateVariables> mail = mailArgumentCaptor.getValue();
         assertThat(mail).isNotNull();
         assertThat(mail.getFrom()).isEqualTo(SENDER);
         assertThat(mail.getTo()).isEqualTo("nikkinicholas.romero@gmail.com");

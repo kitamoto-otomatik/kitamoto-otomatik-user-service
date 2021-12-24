@@ -2,7 +2,7 @@ package com.demo.account.client.impl;
 
 import com.demo.account.exception.MailException;
 import com.demo.account.model.Mail;
-import com.demo.account.model.TemplateVariables;
+import com.demo.account.model.AccountActivationTemplateVariables;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
@@ -30,9 +30,9 @@ public class MailClientImplTest {
     private ObjectMapper objectMapper;
 
     @InjectMocks
-    private MailClientImpl target;
+    private MailClientImpl<AccountActivationTemplateVariables> target;
 
-    private Mail mail;
+    private Mail<AccountActivationTemplateVariables> mail;
 
     @BeforeEach
     public void setup() throws IOException {
@@ -46,16 +46,16 @@ public class MailClientImplTest {
         ReflectionTestUtils.setField(target, "host", HOST + ":" + mockBackEnd.getPort());
         ReflectionTestUtils.setField(target, "endpoint", ENDPOINT);
 
-        TemplateVariables templateVariables = new TemplateVariables();
-        templateVariables.setAccountActivationLink("Some Account Activation Link");
+        AccountActivationTemplateVariables accountActivationTemplateVariables = new AccountActivationTemplateVariables();
+        accountActivationTemplateVariables.setAccountActivationLink("Some Account Activation Link");
 
-        mail = new Mail();
+        mail = new Mail<>();
         mail.setFrom("someFrom@gmail.com");
         mail.setTo("someTo@gmail.com");
         mail.setSubject("Some Subject");
         mail.setBody("Some Body");
         mail.setTemplate("Some Template");
-        mail.setTemplateVariables(templateVariables);
+        mail.setTemplateVariables(accountActivationTemplateVariables);
     }
 
     @AfterEach

@@ -80,9 +80,9 @@ public class AccountActivationServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        RequestException e = assertThrows(RequestException.class, () -> {
-            target.activateAccount("non-existent@gmail.com", "1234");
-        });
+        RequestException e = assertThrows(RequestException.class, () ->
+            target.activateAccount("non-existent@gmail.com", "1234")
+        );
         assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("non-existent@gmail.com");
@@ -105,9 +105,9 @@ public class AccountActivationServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        KeycloakException e = assertThrows(KeycloakException.class, () -> {
-            target.activateAccount("nikkinicholas.romero@gmail.com", "1234");
-        });
+        KeycloakException e = assertThrows(KeycloakException.class, () ->
+            target.activateAccount("nikkinicholas.romero@gmail.com", "1234")
+        );
         assertThat(e.getMessage()).isEqualTo(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
@@ -131,9 +131,9 @@ public class AccountActivationServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        RequestException e = assertThrows(RequestException.class, () -> {
-            target.activateAccount("nikkinicholas.romero@gmail.com", "1234");
-        });
+        RequestException e = assertThrows(RequestException.class, () ->
+            target.activateAccount("nikkinicholas.romero@gmail.com", "1234")
+        );
         assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
@@ -156,9 +156,9 @@ public class AccountActivationServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        RequestException e = assertThrows(RequestException.class, () -> {
-            target.activateAccount("nikkinicholas.romero@gmail.com", "4321");
-        });
+        RequestException e = assertThrows(RequestException.class, () ->
+            target.activateAccount("nikkinicholas.romero@gmail.com", "4321")
+        );
         assertThat(e.getMessage()).isEqualTo(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");

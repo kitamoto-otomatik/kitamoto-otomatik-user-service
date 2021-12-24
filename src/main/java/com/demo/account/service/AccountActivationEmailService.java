@@ -6,6 +6,7 @@ import com.demo.account.exception.KeycloakException;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.KeycloakUser;
 import com.demo.account.model.Mail;
+import com.demo.account.model.AccountActivationTemplateVariables;
 import com.demo.account.model.TemplateVariables;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,7 +44,7 @@ public class AccountActivationEmailService {
     private KeycloakUserClient keycloakUserClient;
 
     @Autowired
-    private MailClient mailClient;
+    private MailClient<AccountActivationTemplateVariables> mailClient;
 
     @Async
     public void resendActivationCode(String username) {
@@ -64,23 +65,23 @@ public class AccountActivationEmailService {
 
     @Async
     public void sendActivationCode(String username, String activationCode) {
-        Mail mail = buildMail(username, activationCode);
+        Mail<AccountActivationTemplateVariables> mail = buildMail(username, activationCode);
         mailClient.sendEmail(mail);
     }
 
-    private Mail buildMail(String username, String activationCode) {
+    private Mail<AccountActivationTemplateVariables> buildMail(String username, String activationCode) {
         String accountActivationLink = String.format(url, username, activationCode);
 
-        TemplateVariables templateVariables = new TemplateVariables();
-        templateVariables.setAccountActivationLink(accountActivationLink);
+        AccountActivationTemplateVariables accountActivationTemplateVariables = new AccountActivationTemplateVariables();
+        accountActivationTemplateVariables.setAccountActivationLink(accountActivationLink);
 
-        Mail mail = new Mail();
+        Mail<AccountActivationTemplateVariables> mail = new Mail<>();
         mail.setFrom(sender);
         mail.setTo(username);
         mail.setSubject(subject);
         mail.setBody(body);
         mail.setTemplate(template);
-        mail.setTemplateVariables(templateVariables);
+        mail.setTemplateVariables(accountActivationTemplateVariables);
         return mail;
     }
 }

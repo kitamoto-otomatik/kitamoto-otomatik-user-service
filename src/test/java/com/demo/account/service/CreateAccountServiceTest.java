@@ -3,6 +3,7 @@ package com.demo.account.service;
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.RequestException;
+import com.demo.account.model.AccountActivationTemplateVariables;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.KeycloakUser;
@@ -34,7 +35,7 @@ public class CreateAccountServiceTest {
     private AccountActivationEmailService accountActivationEmailService;
 
     @Mock
-    private MailClient mailClient;
+    private MailClient<AccountActivationTemplateVariables> mailClient;
 
     @Captor
     private ArgumentCaptor<KeycloakUser> keycloakUserArgumentCaptor;
@@ -60,9 +61,9 @@ public class CreateAccountServiceTest {
         request.setFirstName("someFirstname");
         request.setLastName("someLastname");
 
-        RequestException e = assertThrows(RequestException.class, () -> {
-            target.createAccount(request);
-        });
+        RequestException e = assertThrows(RequestException.class, () ->
+            target.createAccount(request)
+        );
 
         assertThat(e.getMessage()).isEqualTo(USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE);
 
