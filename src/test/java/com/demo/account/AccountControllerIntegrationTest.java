@@ -47,14 +47,14 @@ public class AccountControllerIntegrationTest {
     }
 
     @Test
-    public void activateAccount() throws Exception {
-        this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+    public void resendActivationCode() throws Exception {
+        this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
                 .andExpect(status().isAccepted());
     }
 
     @Test
-    public void resendActivationCode() throws Exception {
-        this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
+    public void activateAccount() throws Exception {
+        this.mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
                 .andExpect(status().isAccepted());
     }
 }

@@ -2,10 +2,12 @@ package com.demo.account.model;
 
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 @Data
 public class CreateAccountRequest {
+    @Email
     @NotBlank
     private String username;
 

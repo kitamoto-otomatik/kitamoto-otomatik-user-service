@@ -53,11 +53,25 @@ public class AccountControllerTest {
                 .thenReturn(AccountStatus.ACTIVE);
 
         mockMvc.perform(get("/accounts/nikkinicholas.romero@gmail.com"))
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(status().isOk());
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
 
         verify(getAccountStatusByUsernameService).getAccountStatusByUsername("nikkinicholas.romero@gmail.com");
+    }
+
+    @Test
+    public void getAccountStatusByUsername_whenInvalidEmail() throws Exception {
+        when(getAccountStatusByUsernameService.getAccountStatusByUsername(anyString()))
+                .thenReturn(AccountStatus.ACTIVE);
+
+        mockMvc.perform(get("/accounts/nikkinicholas.romero"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
+                .andExpect(jsonPath("$.message").value("getAccountStatusByUsername.username: must be a well-formed email address"));
+
+        verifyNoInteractions(getAccountStatusByUsernameService);
     }
 
     @Test
@@ -76,7 +90,7 @@ public class AccountControllerTest {
     @Test
     public void createAccount_whenOk() throws Exception {
         CreateAccountRequest request = new CreateAccountRequest();
-        request.setUsername("someUsername");
+        request.setUsername("someUsername@email.com");
         request.setPassword("somePassword");
         request.setFirstName("someFirstname");
         request.setLastName("someLastname");
@@ -92,7 +106,7 @@ public class AccountControllerTest {
     @Test
     public void createAccount_whenRequestIsInvalid() throws Exception {
         CreateAccountRequest request = new CreateAccountRequest();
-        request.setUsername("");
+        request.setUsername("invalidemail");
         request.setPassword("");
         request.setFirstName("");
         request.setLastName("");
@@ -103,7 +117,7 @@ public class AccountControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.code").value("MethodArgumentNotValidException"))
-                .andExpect(jsonPath("$.message").value("firstName must not be blank, lastName must not be blank, password must not be blank, username must not be blank"));
+                .andExpect(jsonPath("$.message").value("firstName must not be blank, lastName must not be blank, password must not be blank, username must be a well-formed email address"));
 
         verifyNoInteractions(createAccountService);
     }
@@ -113,7 +127,7 @@ public class AccountControllerTest {
         doThrow(new KeycloakException("SOME ERROR")).when(createAccountService).createAccount(any(CreateAccountRequest.class));
 
         CreateAccountRequest request = new CreateAccountRequest();
-        request.setUsername("someUsername");
+        request.setUsername("someUsername@email.com");
         request.setPassword("somePassword");
         request.setFirstName("someFirstname");
         request.setLastName("someLastname");
@@ -127,6 +141,27 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
         verify(createAccountService).createAccount(request);
+    }
+
+    @Test
+    public void resendActivationCode_whenOk() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
+                .andExpect(status().isAccepted());
+
+        verify(activationEmailService).resendActivationCode("nikkinicholas.romero@gmail.com");
+    }
+
+    @Test
+    public void resendActivationCode_whenError() throws Exception {
+        doThrow(new KeycloakException("SOME ERROR")).when(activationEmailService).resendActivationCode(anyString());
+
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("KeycloakException"))
+                .andExpect(jsonPath("$.message").value("SOME ERROR"));
+
+        verify(activationEmailService).resendActivationCode("nikkinicholas.romero@gmail.com");
     }
 
     @Test
@@ -159,26 +194,5 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.message").value("activateAccount.activationCode: must not be blank"));
 
         verifyNoInteractions(accountActivationService);
-    }
-
-    @Test
-    public void resendActivationCode_whenOk() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
-                .andExpect(status().isAccepted());
-
-        verify(activationEmailService).resendActivationCode("nikkinicholas.romero@gmail.com");
-    }
-
-    @Test
-    public void resendActivationCode_whenError() throws Exception {
-        doThrow(new KeycloakException("SOME ERROR")).when(activationEmailService).resendActivationCode(anyString());
-
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.code").value("KeycloakException"))
-                .andExpect(jsonPath("$.message").value("SOME ERROR"));
-
-        verify(activationEmailService).resendActivationCode("nikkinicholas.romero@gmail.com");
     }
 }

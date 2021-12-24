@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +45,7 @@ public class AccountActivationEmailService {
     @Autowired
     private MailClient mailClient;
 
+    @Async
     public void resendActivationCode(String username) {
         List<KeycloakUser> keycloakUserList = keycloakUserClient.getUserListByUsername(username);
         keycloakUserList.removeIf(account -> !username.equals(account.getUsername()));
@@ -60,6 +62,7 @@ public class AccountActivationEmailService {
         }
     }
 
+    @Async
     public void sendActivationCode(String username, String activationCode) {
         Mail mail = buildMail(username, activationCode);
         mailClient.sendEmail(mail);

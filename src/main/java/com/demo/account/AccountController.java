@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,7 @@ public class AccountController {
     private AccountActivationEmailService activationEmailService;
 
     @GetMapping("/{username}")
-    public AccountStatusResponse getAccountStatusByUsername(@PathVariable String username) {
+    public AccountStatusResponse getAccountStatusByUsername(@PathVariable @Email String username) {
         log.info("getAccountStatusByUsername {}", username);
         return new AccountStatusResponse(getAccountStatusByUsernameService.getAccountStatusByUsername(username));
     }
@@ -55,19 +56,19 @@ public class AccountController {
         createAccountService.createAccount(request);
     }
 
+    @PostMapping("/{username}/resendActivationCode")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void resendActivationCode(@PathVariable @NotBlank String username) {
+        log.info("resendActivationCode {}", username);
+        activationEmailService.resendActivationCode(username);
+    }
+
     @PostMapping("/{username}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void activateAccount(@PathVariable @NotBlank String username,
                                 @RequestParam @NotBlank String activationCode) {
         log.info("activateAccount {} - {}", username, activationCode);
         accountActivationService.activateAccount(username, activationCode);
-    }
-
-    @PostMapping("/{username}/resendActivationCode")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void resendActivationCode(@PathVariable @NotBlank String username) {
-        log.info("resendActivationCode {}", username);
-        activationEmailService.resendActivationCode(username);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
