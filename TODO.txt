@@ -1,10 +1,17 @@
+issues
+- email content and body are being ignored
+
+refactor
+- keycloak update user
+
+deployments
+- move URLs to configMaps
+- add sonarqube
+
 features
 - login
 - update profile (first name, last name)
 - change password
-
-deployments
-- move URLs to configMaps
 
 configurability
 - allow registration?
@@ -14,3 +21,4 @@ configurability
 - reset password expiration?
 - consecutive reset password failure?
 - consecutive login failure
+
