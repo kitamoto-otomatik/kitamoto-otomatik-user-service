@@ -1,4 +1,3 @@
-forgot password
 reset password
 login
 move URLs to configMaps
