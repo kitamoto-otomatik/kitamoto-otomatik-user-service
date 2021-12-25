@@ -3,6 +3,7 @@ package com.demo.account;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
+import com.demo.account.model.ResetPasswordRequest;
 import com.demo.account.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +42,9 @@ public class AccountControllerTest {
 
     @MockBean
     private ForgotPasswordService forgotPasswordService;
+
+    @MockBean
+    private ResetPasswordService resetPasswordService;
 
     @BeforeEach
     public void setup() {
@@ -176,6 +180,38 @@ public class AccountControllerTest {
     }
 
     @Test
+    public void activateAccount_whenOk() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+                .andExpect(status().isAccepted());
+
+        verify(accountActivationService).activateAccount("nikkinicholas.romero@gmail.com", "1234");
+    }
+
+    @Test
+    public void activateAccount_whenError() throws Exception {
+        doThrow(new KeycloakException("SOME ERROR")).when(accountActivationService).activateAccount(anyString(), anyString());
+
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("KeycloakException"))
+                .andExpect(jsonPath("$.message").value("SOME ERROR"));
+
+        verify(accountActivationService).activateAccount("nikkinicholas.romero@gmail.com", "1234");
+    }
+
+    @Test
+    public void activateAccount_whenInvalidRequest() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode="))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
+                .andExpect(jsonPath("$.message").value("activateAccount.activationCode: must not be blank"));
+
+        verifyNoInteractions(accountActivationService);
+    }
+
+    @Test
     public void forgotPassword_whenOk() throws Exception {
         mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/password/forgot"))
                 .andExpect(status().isAccepted());
@@ -208,34 +244,55 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void activateAccount_whenOk() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+    public void resetPassword_whenOk() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setUsername("someUsername@email.com");
+        request.setPassword("somePassword");
+        request.setPasswordResetCode("somePasswordResetCode");
+
+        mockMvc.perform(post("/accounts/password")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted());
 
-        verify(accountActivationService).activateAccount("nikkinicholas.romero@gmail.com", "1234");
+        verify(resetPasswordService).resetPassword(request);
     }
 
     @Test
-    public void activateAccount_whenError() throws Exception {
-        doThrow(new KeycloakException("SOME ERROR")).when(accountActivationService).activateAccount(anyString(), anyString());
+    public void resetPassword_whenInvalid() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setUsername("someUsername");
+        request.setPassword("");
+        request.setPasswordResetCode(null);
 
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+        mockMvc.perform(post("/accounts/password")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("MethodArgumentNotValidException"))
+                .andExpect(jsonPath("$.message").value("password must not be blank, passwordResetCode must not be blank, username must be a well-formed email address"));
+
+        verifyNoInteractions(resetPasswordService);
+    }
+
+    @Test
+    public void resetPassword_whenError() throws Exception {
+        doThrow(new KeycloakException("SOME ERROR")).when(resetPasswordService).resetPassword(any());
+
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setUsername("someUsername@email.com");
+        request.setPassword("somePassword");
+        request.setPasswordResetCode("somePasswordResetCode");
+
+        mockMvc.perform(post("/accounts/password")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.code").value("KeycloakException"))
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
-        verify(accountActivationService).activateAccount("nikkinicholas.romero@gmail.com", "1234");
-    }
-
-    @Test
-    public void activateAccount_whenInvalidRequest() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode="))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
-                .andExpect(jsonPath("$.message").value("activateAccount.activationCode: must not be blank"));
-
-        verifyNoInteractions(accountActivationService);
+        verify(resetPasswordService).resetPassword(request);
     }
 }

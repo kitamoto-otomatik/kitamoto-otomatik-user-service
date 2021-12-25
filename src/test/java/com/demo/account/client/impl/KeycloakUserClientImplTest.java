@@ -246,4 +246,59 @@ public class KeycloakUserClientImplTest {
 
         verify(tokenService).getKeycloakToken();
     }
+
+    @Test
+    public void updateKeycloakAccountCredentials_whenOk() throws InterruptedException, JsonProcessingException {
+        mockBackEnd.enqueue(new MockResponse());
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("passwordResetCode", new ArrayList<>());
+        Credential credential = new Credential();
+        credential.setType("password");
+        credential.setValue("somePassword");
+        credential.setTemporary(false);
+        KeycloakResetPasswordRequest keycloakResetPasswordRequest = new KeycloakResetPasswordRequest();
+        keycloakResetPasswordRequest.setAttributes(attributes);
+        keycloakResetPasswordRequest.setCredentials(Collections.singletonList(credential));
+        target.updateKeycloakAccountCredentials("someId", keycloakResetPasswordRequest);
+
+        RecordedRequest recordedRequest = mockBackEnd.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "/someId");
+        assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), KeycloakResetPasswordRequest.class)).isEqualTo(keycloakResetPasswordRequest);
+
+        verify(tokenService).getKeycloakToken();
+    }
+
+    @Test
+    public void updateKeycloakAccountCredentials_whenError() throws InterruptedException, JsonProcessingException {
+        KeycloakErrorResponse keycloakErrorResponse = new KeycloakErrorResponse();
+        keycloakErrorResponse.setErrorMessage("User does not exist");
+
+        MockResponse mockResponse = new MockResponse()
+                .setBody(objectMapper.writeValueAsString(keycloakErrorResponse))
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        mockResponse.status("HTTP/1.1 500 Internal Server Error");
+        mockBackEnd.enqueue(mockResponse);
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("passwordResetCode", new ArrayList<>());
+        Credential credential = new Credential();
+        credential.setType("password");
+        credential.setValue("somePassword");
+        credential.setTemporary(false);
+        KeycloakResetPasswordRequest keycloakResetPasswordRequest = new KeycloakResetPasswordRequest();
+        keycloakResetPasswordRequest.setAttributes(attributes);
+        keycloakResetPasswordRequest.setCredentials(Collections.singletonList(credential));
+        KeycloakException e = assertThrows(KeycloakException.class, () -> target.updateKeycloakAccountCredentials("someId", keycloakResetPasswordRequest));
+        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_UPDATE_ERROR_MESSAGE);
+
+        RecordedRequest recordedRequest = mockBackEnd.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
+        assertThat(recordedRequest.getPath()).isEqualTo(ENDPOINT + "/someId");
+        assertThat(recordedRequest.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer someAccessToken");
+        assertThat(objectMapper.readValue(recordedRequest.getBody().readUtf8(), KeycloakResetPasswordRequest.class)).isEqualTo(keycloakResetPasswordRequest);
+
+        verify(tokenService).getKeycloakToken();
+    }
 }

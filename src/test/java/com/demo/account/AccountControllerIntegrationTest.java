@@ -1,6 +1,7 @@
 package com.demo.account;
 
 import com.demo.account.model.CreateAccountRequest;
+import com.demo.account.model.ResetPasswordRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,19 @@ public class AccountControllerIntegrationTest {
     @Test
     public void forgotPassword() throws Exception {
         this.mockMvc.perform(post("/accounts/sayin.leslieanne@gmail.com/password/forgot"))
+                .andExpect(status().isAccepted());
+    }
+
+    @Test
+    public void resetPassword() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setUsername("sayin.leslieanne@gmail.com");
+        request.setPassword("somePassword");
+        request.setPasswordResetCode("abc123");
+
+        this.mockMvc.perform(post("/accounts/password")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted());
     }
 }

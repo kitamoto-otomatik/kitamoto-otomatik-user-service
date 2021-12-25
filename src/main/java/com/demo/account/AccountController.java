@@ -6,6 +6,7 @@ import com.demo.account.exception.RequestException;
 import com.demo.account.model.AccountStatusResponse;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.ErrorResponse;
+import com.demo.account.model.ResetPasswordRequest;
 import com.demo.account.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class AccountController {
     @Autowired
     private ForgotPasswordService forgotPasswordService;
 
+    @Autowired
+    private ResetPasswordService resetPasswordService;
+
     @GetMapping("/{username}")
     public AccountStatusResponse getAccountStatusByUsername(@PathVariable @Email String username) {
         log.info("getAccountStatusByUsername {}", username);
@@ -76,6 +80,13 @@ public class AccountController {
     public void forgotPassword(@PathVariable @NotBlank @Email String username) {
         log.info("forgotPassword {}", username);
         forgotPasswordService.forgotPassword(username);
+    }
+
+    @PostMapping("/password")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        log.info("resetPassword {}", request);
+        resetPasswordService.resetPassword(request);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

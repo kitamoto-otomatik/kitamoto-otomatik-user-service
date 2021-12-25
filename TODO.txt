@@ -1,9 +1,12 @@
-reset password
-login
-move URLs to configMaps
-change password
+features
+- login
+- update profile (first name, last name)
+- change password
 
-- configurability
+deployments
+- move URLs to configMaps
+
+configurability
 - allow registration?
 - require account activation?
 - consecutive activation failure?

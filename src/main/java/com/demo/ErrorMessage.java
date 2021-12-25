@@ -13,4 +13,5 @@ public class ErrorMessage {
     public static final String ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE = "Account is already activated. ";
     public static final String ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE = "Activation code is incorrect. ";
     public static final String ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE = "Account is not yet activated. ";
+    public static final String PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE = "Password reset code is invalid. ";
 }

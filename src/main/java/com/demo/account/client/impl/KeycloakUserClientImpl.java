@@ -5,6 +5,7 @@ import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.model.AccountActivationRequest;
 import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
+import com.demo.account.model.KeycloakResetPasswordRequest;
 import com.demo.account.model.KeycloakUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,22 @@ public class KeycloakUserClientImpl implements KeycloakUserClient {
                 .uri(e -> e.path(endpoint + "/" + id).build())
                 .headers(httpHeaders())
                 .body(BodyInserters.fromValue(keycloakAccountAttributeUpdateRequest))
+                .retrieve()
+                .onStatus(HttpStatus::isError, errorHandler())
+                .bodyToMono(Void.class)
+                .doOnError(errorHandler(KEYCLOAK_USER_UPDATE_ERROR_MESSAGE, id))
+                .block();
+    }
+
+    @Override
+    public void updateKeycloakAccountCredentials(String id, KeycloakResetPasswordRequest keycloakResetPasswordRequest) {
+        WebClient.builder()
+                .baseUrl(host)
+                .build()
+                .put()
+                .uri(e -> e.path(endpoint + "/" + id).build())
+                .headers(httpHeaders())
+                .body(BodyInserters.fromValue(keycloakResetPasswordRequest))
                 .retrieve()
                 .onStatus(HttpStatus::isError, errorHandler())
                 .bodyToMono(Void.class)
