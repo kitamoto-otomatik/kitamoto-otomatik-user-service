@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class ResetPasswordServiceTest {
-    private static final String CODE = "passwordResetCode";
+    private static final String PASSWORD_RESET_CODE = "passwordResetCode";
 
     @InjectMocks
     private ResetPasswordService target;
@@ -32,18 +32,53 @@ public class ResetPasswordServiceTest {
     private ResetPasswordRequest request;
 
     @Captor
-    private ArgumentCaptor<KeycloakResetPasswordRequest> keycloakResetPasswordRequestArgumentCaptor;
+    private ArgumentCaptor<KeycloakResetPasswordRequest> argumentCaptor;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
 
-        ReflectionTestUtils.setField(target, "code", CODE);
+        ReflectionTestUtils.setField(target, "passwordResetCode", PASSWORD_RESET_CODE);
 
         request = new ResetPasswordRequest();
         request.setUsername("nikkinicholas.romero@gmail.com");
-        request.setPassword("somePassword");
-        request.setPasswordResetCode("somePasswordResetCode");
+        request.setPassword("Password123$");
+        request.setPasswordResetCode(UUID.randomUUID().toString());
+    }
+
+    @Test
+    public void resetPassword() {
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(PASSWORD_RESET_CODE, Collections.singletonList(request.getPasswordResetCode()));
+
+        KeycloakUser keycloakUser1 = new KeycloakUser();
+        keycloakUser1.setId("someId");
+        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser1.setEmailVerified(true);
+        keycloakUser1.setAttributes(attributes);
+        KeycloakUser keycloakUser2 = new KeycloakUser();
+        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
+        List<KeycloakUser> keycloakUserList = new ArrayList<>();
+        keycloakUserList.add(keycloakUser1);
+        keycloakUserList.add(keycloakUser2);
+        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
+
+        target.resetPassword(request);
+
+        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
+        verify(keycloakUserClient).updateKeycloakAccountCredentials(eq("someId"), argumentCaptor.capture());
+        KeycloakResetPasswordRequest keycloakResetPasswordRequest = argumentCaptor.getValue();
+        assertThat(keycloakResetPasswordRequest).isNotNull();
+        assertThat(keycloakResetPasswordRequest.getAttributes()).isNotEmpty();
+        assertThat(keycloakResetPasswordRequest.getAttributes().size()).isEqualTo(1);
+        assertThat(keycloakResetPasswordRequest.getAttributes().containsKey(PASSWORD_RESET_CODE)).isTrue();
+        assertThat(keycloakResetPasswordRequest.getAttributes().get(PASSWORD_RESET_CODE)).isEqualTo(new ArrayList<>());
+        assertThat(keycloakResetPasswordRequest.getCredentials()).isNotEmpty();
+        assertThat(keycloakResetPasswordRequest.getCredentials().size()).isEqualTo(1);
+        assertThat(keycloakResetPasswordRequest.getCredentials().get(0)).isNotNull();
+        assertThat(keycloakResetPasswordRequest.getCredentials().get(0).getType()).isEqualTo("password");
+        assertThat(keycloakResetPasswordRequest.getCredentials().get(0).getValue()).isEqualTo("Password123$");
+        assertThat(keycloakResetPasswordRequest.getCredentials().get(0).isTemporary()).isFalse();
     }
 
     @Test
@@ -134,7 +169,7 @@ public class ResetPasswordServiceTest {
     @Test
     public void resetPassword_whenUserAttributePasswordResetCodeListIsEmpty() {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(CODE, new ArrayList<>());
+        attributes.put(PASSWORD_RESET_CODE, new ArrayList<>());
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setId("someId");
@@ -159,7 +194,7 @@ public class ResetPasswordServiceTest {
     @Test
     public void resetPassword_whenUserAttributePasswordResetCodeValueIsDoesNotMatch() {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(CODE, Collections.singletonList("someOtherValue"));
+        attributes.put(PASSWORD_RESET_CODE, Collections.singletonList("someOtherValue"));
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setId("someId");
@@ -179,40 +214,5 @@ public class ResetPasswordServiceTest {
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
         verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
-    }
-
-    @Test
-    public void resetPassword() {
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(CODE, Collections.singletonList("somePasswordResetCode"));
-
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setEmailVerified(true);
-        keycloakUser1.setAttributes(attributes);
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
-
-        target.resetPassword(request);
-
-        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient).updateKeycloakAccountCredentials(eq("someId"), keycloakResetPasswordRequestArgumentCaptor.capture());
-        KeycloakResetPasswordRequest keycloakResetPasswordRequest = keycloakResetPasswordRequestArgumentCaptor.getValue();
-        assertThat(keycloakResetPasswordRequest).isNotNull();
-        assertThat(keycloakResetPasswordRequest.getAttributes()).isNotEmpty();
-        assertThat(keycloakResetPasswordRequest.getAttributes().size()).isEqualTo(1);
-        assertThat(keycloakResetPasswordRequest.getAttributes().containsKey(CODE)).isTrue();
-        assertThat(keycloakResetPasswordRequest.getAttributes().get(CODE)).isEqualTo(new ArrayList<>());
-        assertThat(keycloakResetPasswordRequest.getCredentials()).isNotEmpty();
-        assertThat(keycloakResetPasswordRequest.getCredentials().size()).isEqualTo(1);
-        assertThat(keycloakResetPasswordRequest.getCredentials().get(0)).isNotNull();
-        assertThat(keycloakResetPasswordRequest.getCredentials().get(0).getType()).isEqualTo("password");
-        assertThat(keycloakResetPasswordRequest.getCredentials().get(0).getValue()).isEqualTo("somePassword");
-        assertThat(keycloakResetPasswordRequest.getCredentials().get(0).isTemporary()).isFalse();
     }
 }

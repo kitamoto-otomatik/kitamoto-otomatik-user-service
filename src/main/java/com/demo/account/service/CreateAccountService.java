@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
 
 import static com.demo.ErrorMessage.USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE;
 
 @Service
 public class CreateAccountService {
     @Value("${account.activation.code}")
-    private String code;
+    private String accountActivationCode;
 
     @Autowired
     private GetAccountStatusByUsernameService getAccountStatusByUsernameService;
@@ -28,33 +28,27 @@ public class CreateAccountService {
     @Autowired
     private AccountActivationEmailService accountActivationEmailService;
 
-    public void createAccount(CreateAccountRequest createAccountRequest) {
-        AccountStatus accountStatus = getAccountStatusByUsernameService.getAccountStatusByUsername(createAccountRequest.getUsername());
+    public void createAccount(CreateAccountRequest request) {
+        AccountStatus accountStatus = getAccountStatusByUsernameService.getAccountStatusByUsername(request.getUsername());
         if (accountStatus != AccountStatus.UNREGISTERED) {
             throw new RequestException(USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE);
         }
 
-        String activationCode = String.valueOf(new Random().nextInt(1_000_000));
-        KeycloakUser keycloakUser = transformToKeycloakUser(createAccountRequest, activationCode);
-        keycloakUserClient.createAccount(keycloakUser);
-        accountActivationEmailService.sendActivationCode(createAccountRequest.getUsername(), activationCode);
+        keycloakUserClient.createAccount(transformToKeycloakUser(request));
+        accountActivationEmailService.sendAccountActivationCode(request.getUsername());
     }
 
-    private KeycloakUser transformToKeycloakUser(CreateAccountRequest createAccountRequest, String activationCode) {
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(code, Collections.singletonList(activationCode));
-
+    private KeycloakUser transformToKeycloakUser(CreateAccountRequest request) {
         Credential credential = new Credential();
         credential.setType("password");
-        credential.setValue(createAccountRequest.getPassword());
+        credential.setValue(request.getPassword());
         credential.setTemporary(false);
 
         KeycloakUser keycloakUser = new KeycloakUser();
-        keycloakUser.setUsername(createAccountRequest.getUsername());
-        keycloakUser.setEmail(createAccountRequest.getUsername());
-        keycloakUser.setFirstName(createAccountRequest.getFirstName());
-        keycloakUser.setLastName(createAccountRequest.getLastName());
-        keycloakUser.setAttributes(attributes);
+        keycloakUser.setUsername(request.getUsername());
+        keycloakUser.setEmail(request.getUsername());
+        keycloakUser.setFirstName(request.getFirstName());
+        keycloakUser.setLastName(request.getLastName());
         keycloakUser.setCredentials(Collections.singletonList(credential));
         return keycloakUser;
     }

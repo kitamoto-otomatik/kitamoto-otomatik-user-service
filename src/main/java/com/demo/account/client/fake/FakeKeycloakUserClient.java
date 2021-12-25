@@ -30,7 +30,7 @@ public class FakeKeycloakUserClient implements KeycloakUserClient {
         if ("nikkinicholas.romero@gmail.com".equals(username)) {
             keycloakUser1.setUsername(username);
             keycloakUser1.setEmailVerified(false);
-        } else if ("sayin.leslieanne@gmail.com".equals(username)){
+        } else if ("sayin.leslieanne@gmail.com".equals(username)) {
             keycloakUser1.setUsername(username);
             keycloakUser1.setEmailVerified(true);
         }

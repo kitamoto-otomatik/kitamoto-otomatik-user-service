@@ -20,24 +20,24 @@ import static com.demo.ErrorMessage.*;
 
 @Slf4j
 @Service
-public class ForgotPasswordService {
+public class SendPasswordResetService {
     @Value("${password.reset.url}")
-    private String url;
+    private String passwordResetUrl;
 
     @Value("${password.reset.code}")
-    private String code;
+    private String passwordResetCode;
 
     @Value("${password.reset.email.sender}")
-    private String sender;
+    private String passwordResetEmailSender;
 
     @Value("${password.reset.email.subject}")
-    private String subject;
+    private String passwordResetEmailSubject;
 
     @Value("${password.reset.email.body}")
-    private String body;
+    private String passwordResetEmailBody;
 
     @Value("${password.reset.email.template}")
-    private String template;
+    private String passwordResetEmailTemplate;
 
     @Autowired
     private KeycloakUserClient keycloakUserClient;
@@ -45,7 +45,7 @@ public class ForgotPasswordService {
     @Autowired
     private MailClient<PasswordResetTemplateVariables> mailClient;
 
-    public void forgotPassword(String username) {
+    public void sendPasswordResetCode(String username) {
         List<KeycloakUser> keycloakUserList = keycloakUserClient.getUserListByUsername(username);
         keycloakUserList.removeIf(account -> !username.equals(account.getUsername()));
 
@@ -58,31 +58,31 @@ public class ForgotPasswordService {
             throw new RequestException(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
         } else {
             String passwordResetCode = UUID.randomUUID().toString();
-            resetPasswordResetCode(keycloakUserList.get(0).getId(), passwordResetCode);
+            updatePasswordResetCode(keycloakUserList.get(0).getId(), passwordResetCode);
             mailClient.sendEmail(buildMail(username, passwordResetCode));
         }
     }
 
-    private void resetPasswordResetCode(String id, String passwordResetCode) {
+    private void updatePasswordResetCode(String id, String passwordResetCode) {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(code, Collections.singletonList(passwordResetCode));
+        attributes.put(this.passwordResetCode, Collections.singletonList(passwordResetCode));
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
         keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
         keycloakUserClient.updateKeycloakAccountAttribute(id, keycloakAccountAttributeUpdateRequest);
     }
 
     private Mail<PasswordResetTemplateVariables> buildMail(String username, String passwordResetCode) {
-        String passwordResetLink = String.format(url, username, passwordResetCode);
+        String passwordResetLink = String.format(passwordResetUrl, username, passwordResetCode);
 
         PasswordResetTemplateVariables passwordResetTemplateVariables = new PasswordResetTemplateVariables();
         passwordResetTemplateVariables.setPasswordResetLink(passwordResetLink);
 
         Mail<PasswordResetTemplateVariables> mail = new Mail<>();
-        mail.setFrom(sender);
+        mail.setFrom(passwordResetEmailSender);
         mail.setTo(username);
-        mail.setSubject(subject);
-        mail.setBody(body);
-        mail.setTemplate(template);
+        mail.setSubject(passwordResetEmailSubject);
+        mail.setBody(passwordResetEmailBody);
+        mail.setTemplate(passwordResetEmailTemplate);
         mail.setTemplateVariables(passwordResetTemplateVariables);
         return mail;
     }

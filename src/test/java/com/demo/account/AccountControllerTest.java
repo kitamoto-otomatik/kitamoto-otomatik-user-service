@@ -15,6 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,13 +37,13 @@ public class AccountControllerTest {
     private CreateAccountService createAccountService;
 
     @MockBean
+    private AccountActivationEmailService accountActivationEmailService;
+
+    @MockBean
     private AccountActivationService accountActivationService;
 
     @MockBean
-    private AccountActivationEmailService activationEmailService;
-
-    @MockBean
-    private ForgotPasswordService forgotPasswordService;
+    private SendPasswordResetService sendPasswordResetService;
 
     @MockBean
     private ResetPasswordService resetPasswordService;
@@ -52,7 +54,7 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void getAccountStatusByUsername_whenOk() throws Exception {
+    public void getAccountStatusByUsername() throws Exception {
         when(getAccountStatusByUsernameService.getAccountStatusByUsername(anyString()))
                 .thenReturn(AccountStatus.ACTIVE);
 
@@ -65,10 +67,7 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void getAccountStatusByUsername_whenInvalidEmail() throws Exception {
-        when(getAccountStatusByUsernameService.getAccountStatusByUsername(anyString()))
-                .thenReturn(AccountStatus.ACTIVE);
-
+    public void getAccountStatusByUsername_whenInvalid() throws Exception {
         mockMvc.perform(get("/accounts/nikkinicholas.romero"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -80,7 +79,8 @@ public class AccountControllerTest {
 
     @Test
     public void getAccountStatusByUsername_whenException() throws Exception {
-        doThrow(new KeycloakException("SOME ERROR")).when(getAccountStatusByUsernameService).getAccountStatusByUsername(anyString());
+        doThrow(new KeycloakException("SOME ERROR")).when(getAccountStatusByUsernameService)
+                .getAccountStatusByUsername(anyString());
 
         mockMvc.perform(get("/accounts/nikkinicholas.romero@gmail.com"))
                 .andExpect(status().isInternalServerError())
@@ -92,12 +92,12 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void createAccount_whenOk() throws Exception {
+    public void createAccount() throws Exception {
         CreateAccountRequest request = new CreateAccountRequest();
-        request.setUsername("someUsername@email.com");
-        request.setPassword("somePassword");
-        request.setFirstName("someFirstname");
-        request.setLastName("someLastname");
+        request.setUsername("nikkinicholas.romero@email.com");
+        request.setPassword("Password123$");
+        request.setFirstName("Nikki Nicholas");
+        request.setLastName("Romero");
 
         mockMvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -108,12 +108,12 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void createAccount_whenRequestIsInvalid() throws Exception {
+    public void createAccount_whenInvalid() throws Exception {
         CreateAccountRequest request = new CreateAccountRequest();
-        request.setUsername("invalidemail");
-        request.setPassword("");
+        request.setUsername("nikkinicholas.romero");
+        request.setPassword(" ");
         request.setFirstName("");
-        request.setLastName("");
+        request.setLastName(null);
 
         mockMvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -148,50 +148,62 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void resendActivationCode_whenOk() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
+    public void sendAccountActivationCode() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/account-activation-code"))
                 .andExpect(status().isAccepted());
 
-        verify(activationEmailService).resendActivationCode("nikkinicholas.romero@gmail.com");
+        verify(accountActivationEmailService).sendAccountActivationCode("nikkinicholas.romero@gmail.com");
     }
 
     @Test
-    public void resendActivationCode_whenInvalid() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero/resendActivationCode"))
+    public void sendAccountActivationCode_whenInvalid() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero/account-activation-code"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
-                .andExpect(jsonPath("$.message").value("resendActivationCode.username: must be a well-formed email address"));
+                .andExpect(jsonPath("$.message").value("sendAccountActivationCode.username: must be a well-formed email address"));
 
-        verifyNoInteractions(activationEmailService);
+        verifyNoInteractions(accountActivationEmailService);
     }
 
     @Test
-    public void resendActivationCode_whenError() throws Exception {
-        doThrow(new KeycloakException("SOME ERROR")).when(activationEmailService).resendActivationCode(anyString());
+    public void sendAccountActivationCode_whenError() throws Exception {
+        doThrow(new KeycloakException("SOME ERROR")).when(accountActivationEmailService)
+                .sendAccountActivationCode(anyString());
 
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/resendActivationCode"))
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/account-activation-code"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.code").value("KeycloakException"))
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
-        verify(activationEmailService).resendActivationCode("nikkinicholas.romero@gmail.com");
+        verify(accountActivationEmailService).sendAccountActivationCode("nikkinicholas.romero@gmail.com");
     }
 
     @Test
-    public void activateAccount_whenOk() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+    public void activateAccount() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?accountActivationCode=1234"))
                 .andExpect(status().isAccepted());
 
         verify(accountActivationService).activateAccount("nikkinicholas.romero@gmail.com", "1234");
+    }
+
+    @Test
+    public void activateAccount_whenInvalid() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?accountActivationCode="))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
+                .andExpect(jsonPath("$.message").value("activateAccount.accountActivationCode: must not be blank"));
+
+        verifyNoInteractions(accountActivationService);
     }
 
     @Test
     public void activateAccount_whenError() throws Exception {
         doThrow(new KeycloakException("SOME ERROR")).when(accountActivationService).activateAccount(anyString(), anyString());
 
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode=1234"))
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?accountActivationCode=1234"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.code").value("KeycloakException"))
@@ -201,56 +213,45 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void activateAccount_whenInvalidRequest() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com?activationCode="))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
-                .andExpect(jsonPath("$.message").value("activateAccount.activationCode: must not be blank"));
-
-        verifyNoInteractions(accountActivationService);
-    }
-
-    @Test
-    public void forgotPassword_whenOk() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/password/forgot"))
+    public void sendPasswordResetCode() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/password-reset"))
                 .andExpect(status().isAccepted());
 
-        verify(forgotPasswordService).forgotPassword("nikkinicholas.romero@gmail.com");
+        verify(sendPasswordResetService).sendPasswordResetCode("nikkinicholas.romero@gmail.com");
     }
 
     @Test
-    public void forgotPassword_whenInvalid() throws Exception {
-        mockMvc.perform(post("/accounts/nikkinicholas.romero/password/forgot"))
+    public void sendPasswordResetCode_whenInvalid() throws Exception {
+        mockMvc.perform(post("/accounts/nikkinicholas.romero/password-reset"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.code").value("ConstraintViolationException"))
-                .andExpect(jsonPath("$.message").value("forgotPassword.username: must be a well-formed email address"));
+                .andExpect(jsonPath("$.message").value("sendPasswordResetCode.username: must be a well-formed email address"));
 
-        verifyNoInteractions(forgotPasswordService);
+        verifyNoInteractions(sendPasswordResetService);
     }
 
     @Test
-    public void forgotPassword_whenError() throws Exception {
-        doThrow(new KeycloakException("SOME ERROR")).when(forgotPasswordService).forgotPassword(anyString());
+    public void sendPasswordResetCode_whenError() throws Exception {
+        doThrow(new KeycloakException("SOME ERROR")).when(sendPasswordResetService).sendPasswordResetCode(anyString());
 
-        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/password/forgot"))
+        mockMvc.perform(post("/accounts/nikkinicholas.romero@gmail.com/password-reset"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.code").value("KeycloakException"))
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
-        verify(forgotPasswordService).forgotPassword("nikkinicholas.romero@gmail.com");
+        verify(sendPasswordResetService).sendPasswordResetCode("nikkinicholas.romero@gmail.com");
     }
 
     @Test
-    public void resetPassword_whenOk() throws Exception {
+    public void resetPassword() throws Exception {
         ResetPasswordRequest request = new ResetPasswordRequest();
-        request.setUsername("someUsername@email.com");
-        request.setPassword("somePassword");
-        request.setPasswordResetCode("somePasswordResetCode");
+        request.setUsername("nikkinicholas.romero@gmail.com");
+        request.setPassword("Password123$");
+        request.setPasswordResetCode(UUID.randomUUID().toString());
 
-        mockMvc.perform(post("/accounts/password")
+        mockMvc.perform(post("/accounts/password-reset")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted());
@@ -261,11 +262,11 @@ public class AccountControllerTest {
     @Test
     public void resetPassword_whenInvalid() throws Exception {
         ResetPasswordRequest request = new ResetPasswordRequest();
-        request.setUsername("someUsername");
+        request.setUsername("nikkinicholas.romero");
         request.setPassword("");
         request.setPasswordResetCode(null);
 
-        mockMvc.perform(post("/accounts/password")
+        mockMvc.perform(post("/accounts/password-reset")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -281,11 +282,11 @@ public class AccountControllerTest {
         doThrow(new KeycloakException("SOME ERROR")).when(resetPasswordService).resetPassword(any());
 
         ResetPasswordRequest request = new ResetPasswordRequest();
-        request.setUsername("someUsername@email.com");
-        request.setPassword("somePassword");
-        request.setPasswordResetCode("somePasswordResetCode");
+        request.setUsername("nikkinicholas.romero@gmail.com");
+        request.setPassword("Password123$");
+        request.setPasswordResetCode(UUID.randomUUID().toString());
 
-        mockMvc.perform(post("/accounts/password")
+        mockMvc.perform(post("/accounts/password-reset")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError())

@@ -23,7 +23,7 @@ import static com.demo.ErrorMessage.*;
 @Service
 public class ResetPasswordService {
     @Value("${password.reset.code}")
-    private String code;
+    private String passwordResetCode;
 
     @Autowired
     private KeycloakUserClient keycloakUserClient;
@@ -40,13 +40,13 @@ public class ResetPasswordService {
         } else if (!keycloakUserList.get(0).isEmailVerified()) {
             throw new RequestException(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
         } else if (MapUtils.isEmpty(keycloakUserList.get(0).getAttributes()) ||
-                CollectionUtils.isEmpty(keycloakUserList.get(0).getAttributes().get(code)) ||
-                StringUtils.isBlank(keycloakUserList.get(0).getAttributes().get(code).get(0)) ||
-                !keycloakUserList.get(0).getAttributes().get(code).get(0).equals(request.getPasswordResetCode())) {
+                CollectionUtils.isEmpty(keycloakUserList.get(0).getAttributes().get(passwordResetCode)) ||
+                StringUtils.isBlank(keycloakUserList.get(0).getAttributes().get(passwordResetCode).get(0)) ||
+                !keycloakUserList.get(0).getAttributes().get(passwordResetCode).get(0).equals(request.getPasswordResetCode())) {
             throw new RequestException(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
         } else {
             Map<String, List<String>> attributes = new HashMap<>();
-            attributes.put(code, new ArrayList<>());
+            attributes.put(passwordResetCode, new ArrayList<>());
 
             Credential credential = new Credential();
             credential.setType("password");

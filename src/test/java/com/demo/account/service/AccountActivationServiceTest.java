@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class AccountActivationServiceTest {
-    private static final String ACTIVATION_CODE = "activationCode";
+    private static final String ACCOUNT_ACTIVATION_CODE = "accountActivationCode";
 
     @InjectMocks
     private AccountActivationService target;
@@ -35,13 +35,13 @@ public class AccountActivationServiceTest {
     public void setup() {
         MockitoAnnotations.openMocks(this);
 
-        ReflectionTestUtils.setField(target, "code", ACTIVATION_CODE);
+        ReflectionTestUtils.setField(target, "accountActivationCode", ACCOUNT_ACTIVATION_CODE);
     }
 
     @Test
-    public void activateAccount_whenOk() {
+    public void activateAccount() {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACTIVATION_CODE, Collections.singletonList("1234"));
+        attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("123456"));
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setId("someId");
@@ -54,7 +54,7 @@ public class AccountActivationServiceTest {
         keycloakUserList.add(keycloakUser2);
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
-        target.activateAccount("nikkinicholas.romero@gmail.com", "1234");
+        target.activateAccount("nikkinicholas.romero@gmail.com", "123456");
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
         verify(keycloakUserClient).activateAccount(eq("someId"), argumentCaptor.capture());
@@ -67,7 +67,7 @@ public class AccountActivationServiceTest {
     @Test
     public void activateAccount_whenUsernameDoesNotExist() {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACTIVATION_CODE, Collections.singletonList("1234"));
+        attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("123456"));
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setId("someId");
@@ -81,8 +81,7 @@ public class AccountActivationServiceTest {
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
         RequestException e = assertThrows(RequestException.class, () ->
-            target.activateAccount("non-existent@gmail.com", "1234")
-        );
+                target.activateAccount("non-existent@gmail.com", "123456"));
         assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("non-existent@gmail.com");
@@ -92,7 +91,7 @@ public class AccountActivationServiceTest {
     @Test
     public void activateAccount_whenMultipleUsersMatchTheUsername() {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACTIVATION_CODE, Collections.singletonList("1234"));
+        attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("123456"));
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setId("someId");
@@ -106,8 +105,7 @@ public class AccountActivationServiceTest {
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
         KeycloakException e = assertThrows(KeycloakException.class, () ->
-            target.activateAccount("nikkinicholas.romero@gmail.com", "1234")
-        );
+                target.activateAccount("nikkinicholas.romero@gmail.com", "123456"));
         assertThat(e.getMessage()).isEqualTo(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
@@ -117,7 +115,7 @@ public class AccountActivationServiceTest {
     @Test
     public void activateAccount_whenUserIsAlreadyActivated() {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACTIVATION_CODE, Collections.singletonList("1234"));
+        attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("123456"));
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setId("someId");
@@ -132,8 +130,7 @@ public class AccountActivationServiceTest {
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
         RequestException e = assertThrows(RequestException.class, () ->
-            target.activateAccount("nikkinicholas.romero@gmail.com", "1234")
-        );
+                target.activateAccount("nikkinicholas.romero@gmail.com", "123456"));
         assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
@@ -143,7 +140,7 @@ public class AccountActivationServiceTest {
     @Test
     public void activateAccount_whenActivationCodeIsIncorrect() {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACTIVATION_CODE, Collections.singletonList("1234"));
+        attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("123456"));
 
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setId("someId");
@@ -157,8 +154,7 @@ public class AccountActivationServiceTest {
         when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
 
         RequestException e = assertThrows(RequestException.class, () ->
-            target.activateAccount("nikkinicholas.romero@gmail.com", "4321")
-        );
+                target.activateAccount("nikkinicholas.romero@gmail.com", "654321"));
         assertThat(e.getMessage()).isEqualTo(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");

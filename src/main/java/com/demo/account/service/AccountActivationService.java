@@ -19,7 +19,7 @@ import static com.demo.ErrorMessage.*;
 @Service
 public class AccountActivationService {
     @Value("${account.activation.code}")
-    private String code;
+    private String accountActivationCode;
 
     @Autowired
     private KeycloakUserClient keycloakUserClient;
@@ -35,7 +35,7 @@ public class AccountActivationService {
             throw new KeycloakException(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
         } else if (keycloakUserList.get(0).isEmailVerified()) {
             throw new RequestException(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
-        } else if (!keycloakUserList.get(0).getAttributes().get(code).get(0).equals(activationCode)) {
+        } else if (!keycloakUserList.get(0).getAttributes().get(accountActivationCode).get(0).equals(activationCode)) {
             throw new RequestException(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
         } else {
             AccountActivationRequest accountActivationRequest = new AccountActivationRequest();

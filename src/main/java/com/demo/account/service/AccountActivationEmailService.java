@@ -4,7 +4,10 @@ import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.KeycloakException;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.*;
+import com.demo.account.model.AccountActivationTemplateVariables;
+import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
+import com.demo.account.model.KeycloakUser;
+import com.demo.account.model.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,22 +23,22 @@ import static com.demo.ErrorMessage.*;
 @Service
 public class AccountActivationEmailService {
     @Value("${account.activation.url}")
-    private String url;
+    private String accountActivationUrl;
 
     @Value("${account.activation.code}")
-    private String code;
+    private String accountActivationCode;
 
     @Value("${account.activation.email.sender}")
-    private String sender;
+    private String accountActivationEmailSender;
 
     @Value("${account.activation.email.subject}")
-    private String subject;
+    private String accountActivationEmailSubject;
 
     @Value("${account.activation.email.body}")
-    private String body;
+    private String accountActivationEmailBody;
 
     @Value("${account.activation.email.template}")
-    private String template;
+    private String accountActivationEmailTemplate;
 
     @Autowired
     private KeycloakUserClient keycloakUserClient;
@@ -44,7 +47,12 @@ public class AccountActivationEmailService {
     private MailClient<AccountActivationTemplateVariables> mailClient;
 
     @Async
-    public void resendActivationCode(String username) {
+    public void sendAccountActivationCode(String username) {
+        String accountActivationCode = String.valueOf(new Random().nextInt(1_000_000));
+        sendAccountActivationCode(username, accountActivationCode);
+    }
+
+    private void sendAccountActivationCode(String username, String accountActivationCode) {
         List<KeycloakUser> keycloakUserList = keycloakUserClient.getUserListByUsername(username);
         keycloakUserList.removeIf(account -> !username.equals(account.getUsername()));
 
@@ -56,38 +64,31 @@ public class AccountActivationEmailService {
         } else if (keycloakUserList.get(0).isEmailVerified()) {
             throw new RequestException(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
         } else {
-            String activationCode = String.valueOf(new Random().nextInt(1_000_000));
-            resetActivationCode(keycloakUserList.get(0).getId(), activationCode);
-            sendActivationCode(username, keycloakUserList.get(0).getAttributes().get(code).get(0));
+            updateAccountActivationCode(keycloakUserList.get(0).getId(), accountActivationCode);
+            mailClient.sendEmail(buildMail(username, accountActivationCode));
         }
     }
 
-    private void resetActivationCode(String id, String activationCode) {
+    private void updateAccountActivationCode(String id, String accountActivationCode) {
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(code, Collections.singletonList(activationCode));
+        attributes.put(this.accountActivationCode, Collections.singletonList(accountActivationCode));
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
         keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
         keycloakUserClient.updateKeycloakAccountAttribute(id, keycloakAccountAttributeUpdateRequest);
     }
 
-    @Async
-    public void sendActivationCode(String username, String activationCode) {
-        Mail<AccountActivationTemplateVariables> mail = buildMail(username, activationCode);
-        mailClient.sendEmail(mail);
-    }
-
-    private Mail<AccountActivationTemplateVariables> buildMail(String username, String activationCode) {
-        String accountActivationLink = String.format(url, username, activationCode);
+    private Mail<AccountActivationTemplateVariables> buildMail(String username, String accountActivationCode) {
+        String accountActivationLink = String.format(accountActivationUrl, username, accountActivationCode);
 
         AccountActivationTemplateVariables accountActivationTemplateVariables = new AccountActivationTemplateVariables();
         accountActivationTemplateVariables.setAccountActivationLink(accountActivationLink);
 
         Mail<AccountActivationTemplateVariables> mail = new Mail<>();
-        mail.setFrom(sender);
+        mail.setFrom(accountActivationEmailSender);
         mail.setTo(username);
-        mail.setSubject(subject);
-        mail.setBody(body);
-        mail.setTemplate(template);
+        mail.setSubject(accountActivationEmailSubject);
+        mail.setBody(accountActivationEmailBody);
+        mail.setTemplate(accountActivationEmailTemplate);
         mail.setTemplateVariables(accountActivationTemplateVariables);
         return mail;
     }
