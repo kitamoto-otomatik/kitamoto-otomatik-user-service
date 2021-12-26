@@ -8,6 +8,8 @@ features
 - login
 - update profile (first name, last name)
 - change password
+- multi-factor login
+- social media login
 
 configurability
 - allow registration?
@@ -17,4 +19,3 @@ configurability
 - reset password expiration?
 - consecutive reset password failure?
 - consecutive login failure
-
