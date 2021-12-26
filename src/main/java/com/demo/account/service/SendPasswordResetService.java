@@ -1,10 +1,10 @@
 package com.demo.account.service;
 
-import com.demo.keycloak.client.KeycloakUserClient;
-import com.demo.mail.client.MailClient;
 import com.demo.account.exception.RequestException;
+import com.demo.keycloak.client.KeycloakUserClient;
 import com.demo.keycloak.model.KeycloakAccountAttributeUpdateRequest;
 import com.demo.keycloak.model.KeycloakUser;
+import com.demo.mail.client.MailClient;
 import com.demo.mail.model.Mail;
 import com.demo.mail.model.PasswordResetTemplateVariables;
 import lombok.extern.slf4j.Slf4j;

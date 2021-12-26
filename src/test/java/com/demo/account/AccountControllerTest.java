@@ -1,10 +1,10 @@
 package com.demo.account;
 
-import com.demo.keycloak.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.ResetPasswordRequest;
 import com.demo.account.service.*;
+import com.demo.keycloak.exception.KeycloakException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.demo.mail.client.impl;
+package com.demo.keycloak.impl;
 
 import com.demo.keycloak.client.KeycloakTokenClient;
 import com.demo.keycloak.client.impl.KeycloakUserClientImpl;

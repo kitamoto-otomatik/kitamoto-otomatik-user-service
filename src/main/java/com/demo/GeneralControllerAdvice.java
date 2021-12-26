@@ -1,9 +1,10 @@
-package com.demo.account;
+package com.demo;
 
-import com.demo.keycloak.exception.KeycloakException;
-import com.demo.mail.exception.MailException;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.ErrorResponse;
+import com.demo.keycloak.exception.AuthenticationException;
+import com.demo.keycloak.exception.KeycloakException;
+import com.demo.mail.exception.MailException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,10 +18,16 @@ import javax.validation.ConstraintViolationException;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-public class AccountControllerAdvice {
+public class GeneralControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({KeycloakException.class, MailException.class})
     public HttpEntity<ErrorResponse> internalErrorExceptionHandler(Exception e) {
+        return new HttpEntity<>(new ErrorResponse(e.getClass().getSimpleName(), e.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AuthenticationException.class)
+    public HttpEntity<ErrorResponse> unauthorizedExceptionHandler(AuthenticationException e) {
         return new HttpEntity<>(new ErrorResponse(e.getClass().getSimpleName(), e.getMessage()));
     }
 

@@ -1,7 +1,7 @@
 package com.demo.account.service;
 
-import com.demo.keycloak.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
+import com.demo.keycloak.client.KeycloakUserClient;
 import com.demo.keycloak.model.AccountActivationRequest;
 import com.demo.keycloak.model.KeycloakUser;
 import org.junit.jupiter.api.BeforeEach;

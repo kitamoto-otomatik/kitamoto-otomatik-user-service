@@ -1,6 +1,7 @@
 package com.demo.keycloak.client.impl;
 
 import com.demo.keycloak.client.KeycloakTokenClient;
+import com.demo.keycloak.exception.AuthenticationException;
 import com.demo.keycloak.exception.KeycloakException;
 import com.demo.keycloak.model.AccessToken;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,12 @@ public class KeycloakTokenClientImpl implements KeycloakTokenClient {
     @Value("${keycloak.token.client.secret.value}")
     private String clientSecretValue;
 
+    @Value("${keycloak.token.username}")
+    private String username;
+
+    @Value("${keycloak.token.password}")
+    private String password;
+
     @Override
     public String getKeycloakToken() {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -64,6 +71,35 @@ public class KeycloakTokenClientImpl implements KeycloakTokenClient {
                 .doOnError(e -> {
                     log.error(KEYCLOAK_TOKEN_ERROR_MESSAGE, e);
                     throw new KeycloakException(KEYCLOAK_TOKEN_ERROR_MESSAGE);
+                })
+                .map(AccessToken::getAccessToken)
+                .block();
+    }
+
+    @Override
+    public String getKeycloakToken(String username, String password) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add(grantTypeKey, grantTypeValue);
+        formData.add(clientIdKey, clientIdValue);
+        formData.add(clientSecretKey, clientSecretValue);
+        formData.add(this.username, username);
+        formData.add(this.password, password);
+
+        return WebClient.builder()
+                .baseUrl(host)
+                .build()
+                .post()
+                .uri(e -> e.path(endpoint).build())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(formData))
+                .retrieve()
+                .onStatus(HttpStatus::isError, response -> response
+                        .createException()
+                        .map(e -> new RuntimeException(e.getResponseBodyAsString())))
+                .bodyToMono(AccessToken.class)
+                .doOnError(e -> {
+                    log.error(KEYCLOAK_TOKEN_ERROR_MESSAGE, e);
+                    throw new AuthenticationException(KEYCLOAK_TOKEN_ERROR_MESSAGE);
                 })
                 .map(AccessToken::getAccessToken)
                 .block();
