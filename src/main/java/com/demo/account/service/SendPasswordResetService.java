@@ -32,9 +32,6 @@ public class SendPasswordResetService {
     @Value("${password.reset.email.subject}")
     private String passwordResetEmailSubject;
 
-    @Value("${password.reset.email.body}")
-    private String passwordResetEmailBody;
-
     @Value("${password.reset.email.template}")
     private String passwordResetEmailTemplate;
 
@@ -79,7 +76,6 @@ public class SendPasswordResetService {
         mail.setFrom(passwordResetEmailSender);
         mail.setTo(username);
         mail.setSubject(passwordResetEmailSubject);
-        mail.setBody(passwordResetEmailBody);
         mail.setTemplate(passwordResetEmailTemplate);
         mail.setTemplateVariables(passwordResetTemplateVariables);
         return mail;

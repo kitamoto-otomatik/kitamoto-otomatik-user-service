@@ -26,7 +26,6 @@ public class AccountActivationEmailServiceTest {
     private static final String ACCOUNT_ACTIVATION_CODE = "accountActivationCode";
     private static final String ACCOUNT_ACTIVATION_EMAIL_SENDER = "nikkinicholas.romero@gmail.com";
     private static final String ACCOUNT_ACTIVATION_EMAIL_SUBJECT = "Account Activation";
-    private static final String ACCOUNT_ACTIVATION_EMAIL_BODY = "Activate your account by clicking the link below.";
     private static final String ACCOUNT_ACTIVATION_EMAIL_TEMPLATE = "account_activation";
 
     @InjectMocks
@@ -52,7 +51,6 @@ public class AccountActivationEmailServiceTest {
         ReflectionTestUtils.setField(target, "accountActivationCode", ACCOUNT_ACTIVATION_CODE);
         ReflectionTestUtils.setField(target, "accountActivationEmailSender", ACCOUNT_ACTIVATION_EMAIL_SENDER);
         ReflectionTestUtils.setField(target, "accountActivationEmailSubject", ACCOUNT_ACTIVATION_EMAIL_SUBJECT);
-        ReflectionTestUtils.setField(target, "accountActivationEmailBody", ACCOUNT_ACTIVATION_EMAIL_BODY);
         ReflectionTestUtils.setField(target, "accountActivationEmailTemplate", ACCOUNT_ACTIVATION_EMAIL_TEMPLATE);
     }
 
@@ -113,7 +111,6 @@ public class AccountActivationEmailServiceTest {
         assertThat(mail.getFrom()).isEqualTo(ACCOUNT_ACTIVATION_EMAIL_SENDER);
         assertThat(mail.getTo()).isEqualTo("nikkinicholas.romero@gmail.com");
         assertThat(mail.getSubject()).isEqualTo(ACCOUNT_ACTIVATION_EMAIL_SUBJECT);
-        assertThat(mail.getBody()).isEqualTo(ACCOUNT_ACTIVATION_EMAIL_BODY);
         assertThat(mail.getTemplate()).isEqualTo(ACCOUNT_ACTIVATION_EMAIL_TEMPLATE);
         assertThat(mail.getTemplateVariables()).isNotNull();
         assertThat(mail.getTemplateVariables().getAccountActivationLink()).isNotEqualTo("http://localhost:4200/accountActivation?emailAddress=nikkinicholas.romero@gmail.com&accountActivationCode=abcdef");

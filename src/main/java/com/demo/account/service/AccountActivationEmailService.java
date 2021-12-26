@@ -33,9 +33,6 @@ public class AccountActivationEmailService {
     @Value("${account.activation.email.subject}")
     private String accountActivationEmailSubject;
 
-    @Value("${account.activation.email.body}")
-    private String accountActivationEmailBody;
-
     @Value("${account.activation.email.template}")
     private String accountActivationEmailTemplate;
 
@@ -85,7 +82,6 @@ public class AccountActivationEmailService {
         mail.setFrom(accountActivationEmailSender);
         mail.setTo(username);
         mail.setSubject(accountActivationEmailSubject);
-        mail.setBody(accountActivationEmailBody);
         mail.setTemplate(accountActivationEmailTemplate);
         mail.setTemplateVariables(accountActivationTemplateVariables);
         return mail;

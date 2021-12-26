@@ -1,6 +1,3 @@
-issues
-- email content and body are being ignored
-
 deployments
 - move URLs to configMaps
 - add sonarqube

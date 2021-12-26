@@ -26,7 +26,6 @@ public class SendPasswordResetServiceTest {
     private static final String PASSWORD_RESET_CODE = "passwordResetCode";
     private static final String PASSWORD_RESET_EMAIL_SENDER = "nikkinicholas.romero@gmail.com";
     private static final String PASSWORD_RESET_EMAIL_SUBJECT = "Password Reset";
-    private static final String PASSWORD_RESET_EMAIL_BODY = "Reset your password by clicking the link below.";
     private static final String PASSWORD_RESET_EMAIL_TEMPLATE = "password_reset";
 
     @InjectMocks
@@ -52,7 +51,6 @@ public class SendPasswordResetServiceTest {
         ReflectionTestUtils.setField(target, "passwordResetCode", PASSWORD_RESET_CODE);
         ReflectionTestUtils.setField(target, "passwordResetEmailSender", PASSWORD_RESET_EMAIL_SENDER);
         ReflectionTestUtils.setField(target, "passwordResetEmailSubject", PASSWORD_RESET_EMAIL_SUBJECT);
-        ReflectionTestUtils.setField(target, "passwordResetEmailBody", PASSWORD_RESET_EMAIL_BODY);
         ReflectionTestUtils.setField(target, "passwordResetEmailTemplate", PASSWORD_RESET_EMAIL_TEMPLATE);
     }
 
@@ -107,7 +105,6 @@ public class SendPasswordResetServiceTest {
         assertThat(mail.getFrom()).isEqualTo(PASSWORD_RESET_EMAIL_SENDER);
         assertThat(mail.getTo()).isEqualTo("nikkinicholas.romero@gmail.com");
         assertThat(mail.getSubject()).isEqualTo(PASSWORD_RESET_EMAIL_SUBJECT);
-        assertThat(mail.getBody()).isEqualTo(PASSWORD_RESET_EMAIL_BODY);
         assertThat(mail.getTemplate()).isEqualTo(PASSWORD_RESET_EMAIL_TEMPLATE);
         assertThat(mail.getTemplateVariables()).isNotNull();
         assertThat(mail.getTemplateVariables().getPasswordResetLink()).startsWith("http://localhost:4200/passwordReset?emailAddress=nikkinicholas.romero@gmail.com&passwordResetCode=");
