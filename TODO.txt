@@ -5,10 +5,11 @@ deployments
 - delete old images on create of new one
 
 features
-- login
-- update profile (first name, last name)
+- exchange username/password for JWT token
+- validate JWT token
+- update profile
 - change password
-- multi-factor login
+- multi-factor challenge
 - social media login
 
 configurability
