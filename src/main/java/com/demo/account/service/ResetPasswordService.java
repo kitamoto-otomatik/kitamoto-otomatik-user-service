@@ -21,6 +21,8 @@ import static com.demo.ErrorMessage.*;
 @Slf4j
 @Service
 public class ResetPasswordService {
+    private static final String PASSWORD = "password";
+
     @Value("${password.reset.code}")
     private String passwordResetCode;
 
@@ -29,13 +31,11 @@ public class ResetPasswordService {
 
     public void resetPassword(ResetPasswordRequest request) {
         Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(request.getUsername());
-
         if (!optionalKeycloakUser.isPresent()) {
             throw new RequestException(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         }
 
         KeycloakUser keycloakUser = optionalKeycloakUser.get();
-
         if (!keycloakUser.isEmailVerified()) {
             throw new RequestException(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
         }
@@ -52,7 +52,7 @@ public class ResetPasswordService {
         attributes.put(passwordResetCode, new ArrayList<>());
 
         Credential credential = new Credential();
-        credential.setType("password");
+        credential.setType(PASSWORD);
         credential.setValue(request.getPassword());
         credential.setTemporary(false);
 

@@ -25,9 +25,8 @@ public class AccountActivationService {
     @Autowired
     private KeycloakUserClient keycloakUserClient;
 
-    public void activateAccount(String username, String activationCode) {
+    public void activateAccount(String username, String accountActivationCode) {
         Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(username);
-
         if (!optionalKeycloakUser.isPresent()) {
             throw new RequestException(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         }
@@ -38,10 +37,10 @@ public class AccountActivationService {
         }
 
         if (MapUtils.isEmpty(keycloakUser.getAttributes()) ||
-                !keycloakUser.getAttributes().containsKey(accountActivationCode) ||
-                CollectionUtils.isEmpty(keycloakUser.getAttributes().get(accountActivationCode)) ||
-                StringUtils.isEmpty(keycloakUser.getAttributes().get(accountActivationCode).get(0)) ||
-                !keycloakUser.getAttributes().get(accountActivationCode).get(0).equals(activationCode)) {
+                !keycloakUser.getAttributes().containsKey(this.accountActivationCode) ||
+                CollectionUtils.isEmpty(keycloakUser.getAttributes().get(this.accountActivationCode)) ||
+                StringUtils.isEmpty(keycloakUser.getAttributes().get(this.accountActivationCode).get(0)) ||
+                !keycloakUser.getAttributes().get(this.accountActivationCode).get(0).equals(accountActivationCode)) {
             throw new RequestException(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
         }
 

@@ -50,7 +50,6 @@ public class AccountActivationEmailService {
 
     private void sendAccountActivationCode(String username, String accountActivationCode) {
         Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(username);
-
         if (!optionalKeycloakUser.isPresent()) {
             throw new RequestException(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         }

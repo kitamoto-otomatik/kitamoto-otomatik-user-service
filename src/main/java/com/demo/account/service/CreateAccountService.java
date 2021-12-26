@@ -16,6 +16,8 @@ import static com.demo.ErrorMessage.USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE;
 
 @Service
 public class CreateAccountService {
+    private static final String PASSWORD = "password";
+
     @Value("${account.activation.code}")
     private String accountActivationCode;
 
@@ -40,7 +42,7 @@ public class CreateAccountService {
 
     private KeycloakUser transformToKeycloakUser(CreateAccountRequest request) {
         Credential credential = new Credential();
-        credential.setType("password");
+        credential.setType(PASSWORD);
         credential.setValue(request.getPassword());
         credential.setTemporary(false);
 

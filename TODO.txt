@@ -1,6 +1,8 @@
 deployments
-- move URLs to configMaps
+- move values to configMaps
 - add sonarqube
+- migrate to java 11
+- delete old images on create of new one
 
 features
 - login
