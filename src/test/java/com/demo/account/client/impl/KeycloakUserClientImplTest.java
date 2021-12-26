@@ -82,19 +82,23 @@ public class KeycloakUserClientImplTest {
     }
 
     @Test
-    public void getUserListByUsername_whenOk() throws JsonProcessingException, InterruptedException {
+    public void getUserByUsername() throws JsonProcessingException, InterruptedException {
         KeycloakUser keycloakUser1 = new KeycloakUser();
         keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
         keycloakUser1.setEmailVerified(true);
+        KeycloakUser keycloakUser2 = new KeycloakUser();
+        keycloakUser2.setUsername("nikkinicholas.romero@gmail.coms");
+        keycloakUser2.setEmailVerified(true);
         List<KeycloakUser> keycloakUserList = new ArrayList<>();
         keycloakUserList.add(keycloakUser1);
+        keycloakUserList.add(keycloakUser2);
 
         mockBackEnd.enqueue(new MockResponse()
                 .setBody(objectMapper.writeValueAsString(keycloakUserList))
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
-        List<KeycloakUser> actual = target.getUserListByUsername("nikkinicholas.romero@gmail.com");
-        assertThat(actual).isEqualTo(keycloakUserList);
+        Optional<KeycloakUser> actual = target.getUserByUsername("nikkinicholas.romero@gmail.com");
+        assertThat(actual).isEqualTo(Optional.of(keycloakUser1));
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
@@ -110,7 +114,7 @@ public class KeycloakUserClientImplTest {
         mockResponse.status("HTTP/1.1 500 Internal Server Error");
         mockBackEnd.enqueue(mockResponse);
 
-        KeycloakException e = assertThrows(KeycloakException.class, () -> target.getUserListByUsername("nikkinicholas.romero@gmail.com"));
+        KeycloakException e = assertThrows(KeycloakException.class, () -> target.getUserByUsername("nikkinicholas.romero@gmail.com"));
         assertThat(e.getMessage()).isEqualTo(KEYCLOAK_GET_USER_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();

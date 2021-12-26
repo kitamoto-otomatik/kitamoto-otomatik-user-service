@@ -5,39 +5,19 @@ import com.demo.account.model.AccountActivationRequest;
 import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
 import com.demo.account.model.KeycloakResetPasswordRequest;
 import com.demo.account.model.KeycloakUser;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Optional;
 
+@Slf4j
 @Component
 @Profile("mock")
 public class FakeKeycloakUserClient implements KeycloakUserClient {
-    @Value("${account.activation.code}")
-    private String accountActivationCode;
-
-    @Value("${password.reset.code}")
-    private String passwordResetCode;
-
     @Override
-    public List<KeycloakUser> getUserListByUsername(String username) {
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(accountActivationCode, Collections.singletonList("1234"));
-        attributes.put(passwordResetCode, Collections.singletonList("abc123"));
-
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        if ("nikkinicholas.romero@gmail.com".equals(username)) {
-            keycloakUser1.setUsername(username);
-            keycloakUser1.setEmailVerified(false);
-        } else if ("sayin.leslieanne@gmail.com".equals(username)) {
-            keycloakUser1.setUsername(username);
-            keycloakUser1.setEmailVerified(true);
-        }
-        keycloakUser1.setAttributes(attributes);
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        return keycloakUserList;
+    public Optional<KeycloakUser> getUserByUsername(String username) {
+        return Optional.empty();
     }
 
     @Override

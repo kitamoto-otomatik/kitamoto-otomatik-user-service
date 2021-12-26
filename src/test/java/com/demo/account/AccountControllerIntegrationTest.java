@@ -26,7 +26,7 @@ public class AccountControllerIntegrationTest {
     public void getAccountStatusByUsername() throws Exception {
         this.mockMvc.perform(get("/accounts/nikkinicholas.romero@gmail.com"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.status").value("UNVERIFIED"))
+                .andExpect(jsonPath("$.status").value("UNREGISTERED"))
                 .andExpect(status().isOk());
     }
 }

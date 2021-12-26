@@ -8,6 +8,7 @@ import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
 import com.demo.account.model.KeycloakResetPasswordRequest;
 import com.demo.account.model.KeycloakUser;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -40,8 +42,8 @@ public class KeycloakUserClientImpl implements KeycloakUserClient {
     private KeycloakTokenClient tokenService;
 
     @Override
-    public List<KeycloakUser> getUserListByUsername(String username) {
-        return WebClient.builder()
+    public Optional<KeycloakUser> getUserByUsername(String username) {
+        List<KeycloakUser> keycloakUserList = WebClient.builder()
                 .baseUrl(host)
                 .build()
                 .get()
@@ -53,6 +55,11 @@ public class KeycloakUserClientImpl implements KeycloakUserClient {
                 .doOnError(errorHandler(KEYCLOAK_GET_USER_ERROR_MESSAGE, username))
                 .map(Arrays::asList)
                 .block();
+
+        return CollectionUtils.isEmpty(keycloakUserList) ?
+                Optional.empty() : keycloakUserList.stream()
+                .filter(e -> e.getUsername().equals(username))
+                .findFirst();
     }
 
     @Override

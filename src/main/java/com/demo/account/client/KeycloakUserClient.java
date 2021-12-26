@@ -5,10 +5,10 @@ import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
 import com.demo.account.model.KeycloakResetPasswordRequest;
 import com.demo.account.model.KeycloakUser;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface KeycloakUserClient {
-    List<KeycloakUser> getUserListByUsername(String username);
+    Optional<KeycloakUser> getUserByUsername(String username);
 
     void createAccount(KeycloakUser keycloakUser);
 

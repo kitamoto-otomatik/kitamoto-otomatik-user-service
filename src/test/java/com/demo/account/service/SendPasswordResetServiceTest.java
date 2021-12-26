@@ -2,7 +2,6 @@ package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
-import com.demo.account.exception.KeycloakException;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
 import com.demo.account.model.KeycloakUser;
@@ -13,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
-import static com.demo.ErrorMessage.*;
+import static com.demo.ErrorMessage.ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE;
+import static com.demo.ErrorMessage.USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -58,20 +57,45 @@ public class SendPasswordResetServiceTest {
     }
 
     @Test
+    public void sendPasswordResetCode_whenUsernameDoesNotExist() {
+        when(keycloakUserClient.getUserByUsername(anyString())).thenReturn(Optional.empty());
+
+        RequestException e = assertThrows(RequestException.class, () ->
+                target.sendPasswordResetCode("non-existent@gmail.com"));
+        assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
+
+        verify(keycloakUserClient).getUserByUsername("non-existent@gmail.com");
+        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
+        verifyNoInteractions(mailClient);
+    }
+
+    @Test
+    public void sendPasswordResetCode_whenUserIsNotYetActivated() {
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setId("someId");
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser.setEmailVerified(false);
+        when(keycloakUserClient.getUserByUsername(anyString())).thenReturn(Optional.of(keycloakUser));
+
+        RequestException e = assertThrows(RequestException.class, () ->
+                target.sendPasswordResetCode("nikkinicholas.romero@gmail.com"));
+        assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
+
+        verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
+        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
+        verifyNoInteractions(mailClient);
+    }
+
+    @Test
     public void sendPasswordResetCode() {
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setEmailVerified(true);
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setId("someId");
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser.setEmailVerified(true);
+        when(keycloakUserClient.getUserByUsername(anyString())).thenReturn(Optional.of(keycloakUser));
 
         target.sendPasswordResetCode("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
+        verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
         verify(keycloakUserClient).updateKeycloakAccountAttribute(eq("someId"), keycloakAccountAttributeUpdateRequestArgumentCaptor.capture());
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = keycloakAccountAttributeUpdateRequestArgumentCaptor.getValue();
         assertThat(keycloakAccountAttributeUpdateRequest).isNotNull();
@@ -87,69 +111,5 @@ public class SendPasswordResetServiceTest {
         assertThat(mail.getTemplate()).isEqualTo(PASSWORD_RESET_EMAIL_TEMPLATE);
         assertThat(mail.getTemplateVariables()).isNotNull();
         assertThat(mail.getTemplateVariables().getPasswordResetLink()).startsWith("http://localhost:4200/passwordReset?emailAddress=nikkinicholas.romero@gmail.com&passwordResetCode=");
-    }
-
-    @Test
-    public void sendPasswordResetCode_whenUsernameDoesNotExist() {
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
-
-        RequestException e = assertThrows(RequestException.class, () ->
-                target.sendPasswordResetCode("non-existent@gmail.com"));
-        assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
-
-        verify(keycloakUserClient).getUserListByUsername("non-existent@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
-        verifyNoInteractions(mailClient);
-    }
-
-    @Test
-    public void sendPasswordResetCode_whenMultipleUsersMatchTheUsername() {
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("nikkinicholas.romero@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
-
-        KeycloakException e = assertThrows(KeycloakException.class, () ->
-                target.sendPasswordResetCode("nikkinicholas.romero@gmail.com"));
-        assertThat(e.getMessage()).isEqualTo(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
-
-        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
-        verifyNoInteractions(mailClient);
-    }
-
-    @Test
-    public void sendPasswordResetCode_whenUserIsNotYetActivated() {
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setEmailVerified(false);
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
-
-        RequestException e = assertThrows(RequestException.class, () ->
-                target.sendPasswordResetCode("nikkinicholas.romero@gmail.com"));
-        assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
-
-        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
-        verifyNoInteractions(mailClient);
     }
 }

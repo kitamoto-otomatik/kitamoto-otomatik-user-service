@@ -1,7 +1,6 @@
 package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
-import com.demo.account.exception.KeycloakException;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.Credential;
 import com.demo.account.model.KeycloakResetPasswordRequest;
@@ -29,35 +28,37 @@ public class ResetPasswordService {
     private KeycloakUserClient keycloakUserClient;
 
     public void resetPassword(ResetPasswordRequest request) {
-        List<KeycloakUser> keycloakUserList = keycloakUserClient.getUserListByUsername(request.getUsername());
-        keycloakUserList.removeIf(account -> !request.getUsername().equals(account.getUsername()));
+        Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(request.getUsername());
 
-        if (CollectionUtils.isEmpty(keycloakUserList)) {
+        if (!optionalKeycloakUser.isPresent()) {
             throw new RequestException(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
-        } else if (keycloakUserList.size() != 1) {
-            log.error("{} - {}", NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE, request.getUsername());
-            throw new KeycloakException(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
-        } else if (!keycloakUserList.get(0).isEmailVerified()) {
-            throw new RequestException(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
-        } else if (MapUtils.isEmpty(keycloakUserList.get(0).getAttributes()) ||
-                CollectionUtils.isEmpty(keycloakUserList.get(0).getAttributes().get(passwordResetCode)) ||
-                StringUtils.isBlank(keycloakUserList.get(0).getAttributes().get(passwordResetCode).get(0)) ||
-                !keycloakUserList.get(0).getAttributes().get(passwordResetCode).get(0).equals(request.getPasswordResetCode())) {
-            throw new RequestException(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
-        } else {
-            Map<String, List<String>> attributes = new HashMap<>();
-            attributes.put(passwordResetCode, new ArrayList<>());
-
-            Credential credential = new Credential();
-            credential.setType("password");
-            credential.setValue(request.getPassword());
-            credential.setTemporary(false);
-
-            KeycloakResetPasswordRequest keycloakResetPasswordRequest = new KeycloakResetPasswordRequest();
-            keycloakResetPasswordRequest.setAttributes(attributes);
-            keycloakResetPasswordRequest.setCredentials(Collections.singletonList(credential));
-
-            keycloakUserClient.updateKeycloakAccountCredentials(keycloakUserList.get(0).getId(), keycloakResetPasswordRequest);
         }
+
+        KeycloakUser keycloakUser = optionalKeycloakUser.get();
+
+        if (!keycloakUser.isEmailVerified()) {
+            throw new RequestException(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
+        }
+
+        if (MapUtils.isEmpty(keycloakUser.getAttributes()) ||
+                !keycloakUser.getAttributes().containsKey(passwordResetCode) ||
+                CollectionUtils.isEmpty(keycloakUser.getAttributes().get(passwordResetCode)) ||
+                StringUtils.isEmpty(keycloakUser.getAttributes().get(passwordResetCode).get(0)) ||
+                !keycloakUser.getAttributes().get(passwordResetCode).get(0).equals(request.getPasswordResetCode())) {
+            throw new RequestException(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
+        }
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(passwordResetCode, new ArrayList<>());
+
+        Credential credential = new Credential();
+        credential.setType("password");
+        credential.setValue(request.getPassword());
+        credential.setTemporary(false);
+
+        KeycloakResetPasswordRequest keycloakResetPasswordRequest = new KeycloakResetPasswordRequest();
+        keycloakResetPasswordRequest.setAttributes(attributes);
+        keycloakResetPasswordRequest.setCredentials(Collections.singletonList(credential));
+        keycloakUserClient.updateKeycloakAccountCredentials(keycloakUser.getId(), keycloakResetPasswordRequest);
     }
 }

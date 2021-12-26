@@ -2,7 +2,6 @@ package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
-import com.demo.account.exception.KeycloakException;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.AccountActivationTemplateVariables;
 import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
@@ -15,7 +14,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
-import static com.demo.ErrorMessage.*;
+import static com.demo.ErrorMessage.ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE;
+import static com.demo.ErrorMessage.USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -58,48 +58,12 @@ public class AccountActivationEmailServiceTest {
 
     @Test
     public void sendAccountActivationCode_whenUsernameDoesNotExist() {
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("abcdef"));
-
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setAttributes(attributes);
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
+        when(keycloakUserClient.getUserByUsername(anyString())).thenReturn(Optional.empty());
 
         RequestException e = assertThrows(RequestException.class, () ->
                 target.sendAccountActivationCode("non-existent@gmail.com"));
         assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
-        verify(keycloakUserClient).getUserListByUsername("non-existent@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
-        verifyNoInteractions(mailClient);
-    }
-
-    @Test
-    public void sendAccountActivationCode_whenMultipleUsersMatchTheUsername() {
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("abcdef"));
-
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setAttributes(attributes);
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("nikkinicholas.romero@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
-
-        KeycloakException e = assertThrows(KeycloakException.class, () ->
-                target.sendAccountActivationCode("nikkinicholas.romero@gmail.com"));
-        assertThat(e.getMessage()).isEqualTo(NON_UNIQUE_USERNAME_FOUND_ERROR_MESSAGE);
-        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
+        verify(keycloakUserClient).getUserByUsername("non-existent@gmail.com");
         verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
         verifyNoInteractions(mailClient);
     }
@@ -109,22 +73,17 @@ public class AccountActivationEmailServiceTest {
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("abcdef"));
 
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setAttributes(attributes);
-        keycloakUser1.setEmailVerified(true);
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setId("someId");
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser.setAttributes(attributes);
+        keycloakUser.setEmailVerified(true);
+        when(keycloakUserClient.getUserByUsername(anyString())).thenReturn(Optional.of(keycloakUser));
 
         RequestException e = assertThrows(RequestException.class, () ->
                 target.sendAccountActivationCode("nikkinicholas.romero@gmail.com"));
         assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
-        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
+        verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
         verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
         verifyNoInteractions(mailClient);
     }
@@ -134,20 +93,15 @@ public class AccountActivationEmailServiceTest {
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(ACCOUNT_ACTIVATION_CODE, Collections.singletonList("abcdef"));
 
-        KeycloakUser keycloakUser1 = new KeycloakUser();
-        keycloakUser1.setId("someId");
-        keycloakUser1.setUsername("nikkinicholas.romero@gmail.com");
-        keycloakUser1.setAttributes(attributes);
-        KeycloakUser keycloakUser2 = new KeycloakUser();
-        keycloakUser2.setUsername("sayin.leslieanne@gmail.com");
-        List<KeycloakUser> keycloakUserList = new ArrayList<>();
-        keycloakUserList.add(keycloakUser1);
-        keycloakUserList.add(keycloakUser2);
-        when(keycloakUserClient.getUserListByUsername(anyString())).thenReturn(keycloakUserList);
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setId("someId");
+        keycloakUser.setUsername("nikkinicholas.romero@gmail.com");
+        keycloakUser.setAttributes(attributes);
+        when(keycloakUserClient.getUserByUsername(anyString())).thenReturn(Optional.of(keycloakUser));
 
         target.sendAccountActivationCode("nikkinicholas.romero@gmail.com");
 
-        verify(keycloakUserClient).getUserListByUsername("nikkinicholas.romero@gmail.com");
+        verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
         verify(keycloakUserClient).updateKeycloakAccountAttribute(eq("someId"), keycloakAccountAttributeUpdateRequestArgumentCaptor.capture());
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = keycloakAccountAttributeUpdateRequestArgumentCaptor.getValue();
         assertThat(keycloakAccountAttributeUpdateRequest).isNotNull();
