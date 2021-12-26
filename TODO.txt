@@ -1,9 +1,6 @@
 issues
 - email content and body are being ignored
 
-refactor
-- keycloak update user
-
 deployments
 - move URLs to configMaps
 - add sonarqube
