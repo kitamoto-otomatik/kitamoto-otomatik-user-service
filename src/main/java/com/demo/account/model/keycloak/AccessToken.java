@@ -1,4 +1,4 @@
-package com.demo.account.model;
+package com.demo.account.model.keycloak;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

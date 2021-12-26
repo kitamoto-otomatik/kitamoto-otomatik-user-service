@@ -5,7 +5,6 @@ public class ErrorMessage {
     public static final String KEYCLOAK_GET_USER_ERROR_MESSAGE = "An error was encountered while trying get an account. ";
     public static final String KEYCLOAK_USER_CREATION_ERROR_MESSAGE = "An error was encountered while trying create an account. ";
     public static final String KEYCLOAK_USER_UPDATE_ERROR_MESSAGE = "An error was encountered while trying to update an account. ";
-    public static final String KEYCLOAK_USER_ACTIVATION_ERROR_MESSAGE = "An error was encountered while trying activate an account. ";
     public static final String EMAIL_SENDING_ERROR = "An error was encountered while trying to send an email. ";
     public static final String USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE = "Username not found. ";
     public static final String USERNAME_IS_ALREADY_TAKEN_ERROR_MESSAGE = "Username is already taken. ";

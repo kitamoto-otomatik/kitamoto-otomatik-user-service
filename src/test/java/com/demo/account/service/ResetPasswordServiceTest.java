@@ -2,9 +2,9 @@ package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.KeycloakResetPasswordRequest;
-import com.demo.account.model.KeycloakUser;
 import com.demo.account.model.ResetPasswordRequest;
+import com.demo.account.model.keycloak.KeycloakResetPasswordRequest;
+import com.demo.account.model.keycloak.KeycloakUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -54,7 +54,7 @@ public class ResetPasswordServiceTest {
         assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ResetPasswordServiceTest {
         assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_NOT_YET_ACTIVATED_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class ResetPasswordServiceTest {
         assertThat(e.getMessage()).isEqualTo(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
     }
 
     @Test
@@ -107,7 +107,7 @@ public class ResetPasswordServiceTest {
         assertThat(e.getMessage()).isEqualTo(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ResetPasswordServiceTest {
         assertThat(e.getMessage()).isEqualTo(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
     }
 
     @Test
@@ -147,7 +147,7 @@ public class ResetPasswordServiceTest {
         assertThat(e.getMessage()).isEqualTo(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
     }
 
     @Test
@@ -167,7 +167,7 @@ public class ResetPasswordServiceTest {
         assertThat(e.getMessage()).isEqualTo(PASSWORD_RESET_CODE_INVALID_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountCredentials(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
     }
 
     @Test
@@ -185,7 +185,7 @@ public class ResetPasswordServiceTest {
         target.resetPassword(request);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient).updateKeycloakAccountCredentials(eq("someId"), argumentCaptor.capture());
+        verify(keycloakUserClient).updateUser(eq("someId"), argumentCaptor.capture());
         KeycloakResetPasswordRequest keycloakResetPasswordRequest = argumentCaptor.getValue();
         assertThat(keycloakResetPasswordRequest).isNotNull();
         assertThat(keycloakResetPasswordRequest.getAttributes()).isNotEmpty();

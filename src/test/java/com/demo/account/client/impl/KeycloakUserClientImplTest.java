@@ -2,7 +2,7 @@ package com.demo.account.client.impl;
 
 import com.demo.account.client.KeycloakTokenClient;
 import com.demo.account.exception.KeycloakException;
-import com.demo.account.model.*;
+import com.demo.account.model.keycloak.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
@@ -169,7 +169,7 @@ public class KeycloakUserClientImplTest {
         AccountActivationRequest accountActivationRequest = new AccountActivationRequest();
         accountActivationRequest.setEmailVerified(true);
         accountActivationRequest.setEnabled(true);
-        target.activateAccount("someId", accountActivationRequest);
+        target.updateUser("someId", accountActivationRequest);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
@@ -194,8 +194,8 @@ public class KeycloakUserClientImplTest {
         AccountActivationRequest accountActivationRequest = new AccountActivationRequest();
         accountActivationRequest.setEmailVerified(true);
         accountActivationRequest.setEnabled(true);
-        KeycloakException e = assertThrows(KeycloakException.class, () -> target.activateAccount("someId", accountActivationRequest));
-        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_ACTIVATION_ERROR_MESSAGE);
+        KeycloakException e = assertThrows(KeycloakException.class, () -> target.updateUser("someId", accountActivationRequest));
+        assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_UPDATE_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
@@ -213,7 +213,7 @@ public class KeycloakUserClientImplTest {
         attributes.put("activationCode", Collections.singletonList("1234"));
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
         keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
-        target.updateKeycloakAccountAttribute("someId", keycloakAccountAttributeUpdateRequest);
+        target.updateUser("someId", keycloakAccountAttributeUpdateRequest);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
@@ -239,7 +239,7 @@ public class KeycloakUserClientImplTest {
         attributes.put("activationCode", Collections.singletonList("1234"));
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
         keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
-        KeycloakException e = assertThrows(KeycloakException.class, () -> target.updateKeycloakAccountAttribute("someId", keycloakAccountAttributeUpdateRequest));
+        KeycloakException e = assertThrows(KeycloakException.class, () -> target.updateUser("someId", keycloakAccountAttributeUpdateRequest));
         assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_UPDATE_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
@@ -263,7 +263,7 @@ public class KeycloakUserClientImplTest {
         KeycloakResetPasswordRequest keycloakResetPasswordRequest = new KeycloakResetPasswordRequest();
         keycloakResetPasswordRequest.setAttributes(attributes);
         keycloakResetPasswordRequest.setCredentials(Collections.singletonList(credential));
-        target.updateKeycloakAccountCredentials("someId", keycloakResetPasswordRequest);
+        target.updateUser("someId", keycloakResetPasswordRequest);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
@@ -294,7 +294,7 @@ public class KeycloakUserClientImplTest {
         KeycloakResetPasswordRequest keycloakResetPasswordRequest = new KeycloakResetPasswordRequest();
         keycloakResetPasswordRequest.setAttributes(attributes);
         keycloakResetPasswordRequest.setCredentials(Collections.singletonList(credential));
-        KeycloakException e = assertThrows(KeycloakException.class, () -> target.updateKeycloakAccountCredentials("someId", keycloakResetPasswordRequest));
+        KeycloakException e = assertThrows(KeycloakException.class, () -> target.updateUser("someId", keycloakResetPasswordRequest));
         assertThat(e.getMessage()).isEqualTo(KEYCLOAK_USER_UPDATE_ERROR_MESSAGE);
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();

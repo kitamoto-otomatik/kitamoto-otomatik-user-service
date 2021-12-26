@@ -1,8 +1,8 @@
 package com.demo.account.client.impl;
 
 import com.demo.account.exception.MailException;
-import com.demo.account.model.AccountActivationTemplateVariables;
-import com.demo.account.model.Mail;
+import com.demo.account.model.mail.AccountActivationTemplateVariables;
+import com.demo.account.model.mail.Mail;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;

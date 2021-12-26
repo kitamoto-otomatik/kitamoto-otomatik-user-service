@@ -3,10 +3,10 @@ package com.demo.account.service;
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.AccountActivationTemplateVariables;
-import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
-import com.demo.account.model.KeycloakUser;
-import com.demo.account.model.Mail;
+import com.demo.account.model.keycloak.KeycloakAccountAttributeUpdateRequest;
+import com.demo.account.model.keycloak.KeycloakUser;
+import com.demo.account.model.mail.AccountActivationTemplateVariables;
+import com.demo.account.model.mail.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +72,7 @@ public class AccountActivationEmailService {
         attributes.put(this.accountActivationCode, Collections.singletonList(accountActivationCode));
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
         keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
-        keycloakUserClient.updateKeycloakAccountAttribute(id, keycloakAccountAttributeUpdateRequest);
+        keycloakUserClient.updateUser(id, keycloakAccountAttributeUpdateRequest);
     }
 
     private Mail<AccountActivationTemplateVariables> buildMail(String username, String accountActivationCode) {

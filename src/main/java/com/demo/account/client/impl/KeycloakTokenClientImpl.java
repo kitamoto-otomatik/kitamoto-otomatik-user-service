@@ -2,7 +2,7 @@ package com.demo.account.client.impl;
 
 import com.demo.account.client.KeycloakTokenClient;
 import com.demo.account.exception.KeycloakException;
-import com.demo.account.model.AccessToken;
+import com.demo.account.model.keycloak.AccessToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

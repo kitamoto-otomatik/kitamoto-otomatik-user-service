@@ -2,8 +2,8 @@ package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.AccountActivationRequest;
-import com.demo.account.model.KeycloakUser;
+import com.demo.account.model.keycloak.AccountActivationRequest;
+import com.demo.account.model.keycloak.KeycloakUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -48,6 +48,6 @@ public class AccountActivationService {
         AccountActivationRequest accountActivationRequest = new AccountActivationRequest();
         accountActivationRequest.setEnabled(true);
         accountActivationRequest.setEmailVerified(true);
-        keycloakUserClient.activateAccount(keycloakUser.getId(), accountActivationRequest);
+        keycloakUserClient.updateUser(keycloakUser.getId(), accountActivationRequest);
     }
 }

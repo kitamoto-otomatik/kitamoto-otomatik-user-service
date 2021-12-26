@@ -2,8 +2,8 @@ package com.demo.account.client.impl;
 
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.MailException;
-import com.demo.account.model.Mail;
-import com.demo.account.model.TemplateVariables;
+import com.demo.account.model.mail.Mail;
+import com.demo.account.model.mail.TemplateVariables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;

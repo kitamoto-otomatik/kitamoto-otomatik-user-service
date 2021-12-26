@@ -1,10 +1,8 @@
 package com.demo.account.client.fake;
 
 import com.demo.account.client.KeycloakUserClient;
-import com.demo.account.model.AccountActivationRequest;
-import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
-import com.demo.account.model.KeycloakResetPasswordRequest;
-import com.demo.account.model.KeycloakUser;
+import com.demo.account.model.keycloak.KeycloakUser;
+import com.demo.account.model.keycloak.UserRepresentation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -25,14 +23,6 @@ public class FakeKeycloakUserClient implements KeycloakUserClient {
     }
 
     @Override
-    public void activateAccount(String id, AccountActivationRequest accountActivationRequest) {
-    }
-
-    @Override
-    public void updateKeycloakAccountAttribute(String id, KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest) {
-    }
-
-    @Override
-    public void updateKeycloakAccountCredentials(String id, KeycloakResetPasswordRequest keycloakResetPasswordRequest) {
+    public <T extends UserRepresentation> void updateUser(String id, T userRepresentation) {
     }
 }

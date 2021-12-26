@@ -3,10 +3,10 @@ package com.demo.account.service;
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
-import com.demo.account.model.KeycloakUser;
-import com.demo.account.model.Mail;
-import com.demo.account.model.PasswordResetTemplateVariables;
+import com.demo.account.model.keycloak.KeycloakAccountAttributeUpdateRequest;
+import com.demo.account.model.keycloak.KeycloakUser;
+import com.demo.account.model.mail.Mail;
+import com.demo.account.model.mail.PasswordResetTemplateVariables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,7 +66,7 @@ public class SendPasswordResetService {
         attributes.put(this.passwordResetCode, Collections.singletonList(passwordResetCode));
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = new KeycloakAccountAttributeUpdateRequest();
         keycloakAccountAttributeUpdateRequest.setAttributes(attributes);
-        keycloakUserClient.updateKeycloakAccountAttribute(id, keycloakAccountAttributeUpdateRequest);
+        keycloakUserClient.updateUser(id, keycloakAccountAttributeUpdateRequest);
     }
 
     private Mail<PasswordResetTemplateVariables> buildMail(String username, String passwordResetCode) {

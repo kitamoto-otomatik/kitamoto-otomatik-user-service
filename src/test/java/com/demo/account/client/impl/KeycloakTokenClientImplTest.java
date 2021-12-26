@@ -1,7 +1,7 @@
 package com.demo.account.client.impl;
 
 import com.demo.account.exception.KeycloakException;
-import com.demo.account.model.AccessToken;
+import com.demo.account.model.keycloak.AccessToken;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;

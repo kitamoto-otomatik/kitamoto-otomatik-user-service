@@ -3,10 +3,10 @@ package com.demo.account.service;
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.client.MailClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.AccountActivationTemplateVariables;
-import com.demo.account.model.KeycloakAccountAttributeUpdateRequest;
-import com.demo.account.model.KeycloakUser;
-import com.demo.account.model.Mail;
+import com.demo.account.model.keycloak.KeycloakAccountAttributeUpdateRequest;
+import com.demo.account.model.keycloak.KeycloakUser;
+import com.demo.account.model.mail.AccountActivationTemplateVariables;
+import com.demo.account.model.mail.Mail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -64,7 +64,7 @@ public class AccountActivationEmailServiceTest {
                 target.sendAccountActivationCode("non-existent@gmail.com"));
         assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         verify(keycloakUserClient).getUserByUsername("non-existent@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
         verifyNoInteractions(mailClient);
     }
 
@@ -84,7 +84,7 @@ public class AccountActivationEmailServiceTest {
                 target.sendAccountActivationCode("nikkinicholas.romero@gmail.com"));
         assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).updateKeycloakAccountAttribute(anyString(), any());
+        verify(keycloakUserClient, never()).updateUser(anyString(), any());
         verifyNoInteractions(mailClient);
     }
 
@@ -102,7 +102,7 @@ public class AccountActivationEmailServiceTest {
         target.sendAccountActivationCode("nikkinicholas.romero@gmail.com");
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient).updateKeycloakAccountAttribute(eq("someId"), keycloakAccountAttributeUpdateRequestArgumentCaptor.capture());
+        verify(keycloakUserClient).updateUser(eq("someId"), keycloakAccountAttributeUpdateRequestArgumentCaptor.capture());
         KeycloakAccountAttributeUpdateRequest keycloakAccountAttributeUpdateRequest = keycloakAccountAttributeUpdateRequestArgumentCaptor.getValue();
         assertThat(keycloakAccountAttributeUpdateRequest).isNotNull();
         assertThat(keycloakAccountAttributeUpdateRequest.getAttributes()).isNotEmpty();

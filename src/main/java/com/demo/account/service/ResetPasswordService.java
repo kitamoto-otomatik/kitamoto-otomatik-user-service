@@ -2,10 +2,10 @@ package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.Credential;
-import com.demo.account.model.KeycloakResetPasswordRequest;
-import com.demo.account.model.KeycloakUser;
 import com.demo.account.model.ResetPasswordRequest;
+import com.demo.account.model.keycloak.Credential;
+import com.demo.account.model.keycloak.KeycloakResetPasswordRequest;
+import com.demo.account.model.keycloak.KeycloakUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -59,6 +59,6 @@ public class ResetPasswordService {
         KeycloakResetPasswordRequest keycloakResetPasswordRequest = new KeycloakResetPasswordRequest();
         keycloakResetPasswordRequest.setAttributes(attributes);
         keycloakResetPasswordRequest.setCredentials(Collections.singletonList(credential));
-        keycloakUserClient.updateKeycloakAccountCredentials(keycloakUser.getId(), keycloakResetPasswordRequest);
+        keycloakUserClient.updateUser(keycloakUser.getId(), keycloakResetPasswordRequest);
     }
 }

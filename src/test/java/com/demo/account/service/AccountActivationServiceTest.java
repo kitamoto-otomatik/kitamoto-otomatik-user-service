@@ -2,8 +2,8 @@ package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.AccountActivationRequest;
-import com.demo.account.model.KeycloakUser;
+import com.demo.account.model.keycloak.AccountActivationRequest;
+import com.demo.account.model.keycloak.KeycloakUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -46,7 +46,7 @@ public class AccountActivationServiceTest {
         assertThat(e.getMessage()).isEqualTo(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("non-existent@gmail.com");
-        verify(keycloakUserClient, never()).activateAccount(any(), any());
+        verify(keycloakUserClient, never()).updateUser(any(), any());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class AccountActivationServiceTest {
         assertThat(e.getMessage()).isEqualTo(ACCOUNT_IS_ALREADY_ACTIVATED_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).activateAccount(any(), any());
+        verify(keycloakUserClient, never()).updateUser(any(), any());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class AccountActivationServiceTest {
         assertThat(e.getMessage()).isEqualTo(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).activateAccount(any(), any());
+        verify(keycloakUserClient, never()).updateUser(any(), any());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class AccountActivationServiceTest {
         assertThat(e.getMessage()).isEqualTo(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).activateAccount(any(), any());
+        verify(keycloakUserClient, never()).updateUser(any(), any());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class AccountActivationServiceTest {
         assertThat(e.getMessage()).isEqualTo(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).activateAccount(any(), any());
+        verify(keycloakUserClient, never()).updateUser(any(), any());
     }
 
     @Test
@@ -139,7 +139,7 @@ public class AccountActivationServiceTest {
         assertThat(e.getMessage()).isEqualTo(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).activateAccount(any(), any());
+        verify(keycloakUserClient, never()).updateUser(any(), any());
     }
 
     @Test
@@ -158,7 +158,7 @@ public class AccountActivationServiceTest {
         assertThat(e.getMessage()).isEqualTo(ACTIVATION_CODE_IS_INCORRECT_ERROR_MESSAGE);
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient, never()).activateAccount(any(), any());
+        verify(keycloakUserClient, never()).updateUser(any(), any());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class AccountActivationServiceTest {
         target.activateAccount("nikkinicholas.romero@gmail.com", "123456");
 
         verify(keycloakUserClient).getUserByUsername("nikkinicholas.romero@gmail.com");
-        verify(keycloakUserClient).activateAccount(eq("someId"), argumentCaptor.capture());
+        verify(keycloakUserClient).updateUser(eq("someId"), argumentCaptor.capture());
         AccountActivationRequest accountActivationRequest = argumentCaptor.getValue();
         assertThat(accountActivationRequest).isNotNull();
         assertThat(accountActivationRequest.isEmailVerified()).isTrue();

@@ -2,7 +2,7 @@ package com.demo.account.service;
 
 import com.demo.account.client.KeycloakUserClient;
 import com.demo.account.model.AccountStatus;
-import com.demo.account.model.KeycloakUser;
+import com.demo.account.model.keycloak.KeycloakUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
