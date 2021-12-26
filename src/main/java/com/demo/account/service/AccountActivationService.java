@@ -1,9 +1,9 @@
 package com.demo.account.service;
 
-import com.demo.account.client.KeycloakUserClient;
+import com.demo.keycloak.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.keycloak.AccountActivationRequest;
-import com.demo.account.model.keycloak.KeycloakUser;
+import com.demo.keycloak.model.AccountActivationRequest;
+import com.demo.keycloak.model.KeycloakUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;

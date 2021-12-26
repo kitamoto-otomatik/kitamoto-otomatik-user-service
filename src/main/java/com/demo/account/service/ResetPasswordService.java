@@ -1,11 +1,11 @@
 package com.demo.account.service;
 
-import com.demo.account.client.KeycloakUserClient;
+import com.demo.keycloak.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.ResetPasswordRequest;
-import com.demo.account.model.keycloak.Credential;
-import com.demo.account.model.keycloak.KeycloakResetPasswordRequest;
-import com.demo.account.model.keycloak.KeycloakUser;
+import com.demo.keycloak.model.Credential;
+import com.demo.keycloak.model.KeycloakResetPasswordRequest;
+import com.demo.keycloak.model.KeycloakUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;

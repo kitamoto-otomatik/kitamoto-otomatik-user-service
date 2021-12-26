@@ -1,11 +1,11 @@
 package com.demo.account.service;
 
-import com.demo.account.client.KeycloakUserClient;
+import com.demo.keycloak.client.KeycloakUserClient;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
-import com.demo.account.model.keycloak.Credential;
-import com.demo.account.model.keycloak.KeycloakUser;
+import com.demo.keycloak.model.Credential;
+import com.demo.keycloak.model.KeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

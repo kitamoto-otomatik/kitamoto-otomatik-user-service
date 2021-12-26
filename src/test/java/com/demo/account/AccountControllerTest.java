@@ -1,6 +1,6 @@
 package com.demo.account;
 
-import com.demo.account.exception.KeycloakException;
+import com.demo.keycloak.exception.KeycloakException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.ResetPasswordRequest;

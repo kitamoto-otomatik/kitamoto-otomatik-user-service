@@ -1,7 +1,7 @@
 package com.demo.account;
 
-import com.demo.account.exception.KeycloakException;
-import com.demo.account.exception.MailException;
+import com.demo.keycloak.exception.KeycloakException;
+import com.demo.mail.exception.MailException;
 import com.demo.account.exception.RequestException;
 import com.demo.account.model.ErrorResponse;
 import org.springframework.http.HttpEntity;

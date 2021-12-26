@@ -1,12 +1,12 @@
 package com.demo.account.service;
 
-import com.demo.account.client.KeycloakUserClient;
-import com.demo.account.client.MailClient;
+import com.demo.keycloak.client.KeycloakUserClient;
+import com.demo.mail.client.MailClient;
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.keycloak.KeycloakAccountAttributeUpdateRequest;
-import com.demo.account.model.keycloak.KeycloakUser;
-import com.demo.account.model.mail.AccountActivationTemplateVariables;
-import com.demo.account.model.mail.Mail;
+import com.demo.keycloak.model.KeycloakAccountAttributeUpdateRequest;
+import com.demo.keycloak.model.KeycloakUser;
+import com.demo.mail.model.AccountActivationTemplateVariables;
+import com.demo.mail.model.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
