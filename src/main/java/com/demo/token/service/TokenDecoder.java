@@ -1,7 +1,6 @@
 package com.demo.token.service;
 
 import com.demo.keycloak.exception.AuthenticationException;
-import com.demo.token.model.ValidateTokenRequest;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,9 +1,6 @@
 package com.demo.account;
 
-import com.demo.account.model.AccountStatusResponse;
-import com.demo.account.model.CreateAccountRequest;
-import com.demo.account.model.ResetPasswordRequest;
-import com.demo.account.model.UpdateProfileRequest;
+import com.demo.account.model.*;
 import com.demo.account.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +37,9 @@ public class AccountController {
 
     @Autowired
     private UpdateProfileService updateProfileService;
+
+    @Autowired
+    private UpdatePasswordService updatePasswordService;
 
     @GetMapping("/{username}")
     public AccountStatusResponse getAccountStatusByUsername(@PathVariable @Email String username) {
@@ -88,5 +88,12 @@ public class AccountController {
     public void updateProfile(@RequestHeader String token, @RequestBody @Valid UpdateProfileRequest request) {
         log.info("updateProfile {} - {}", token, request);
         updateProfileService.updateProfile(token, request);
+    }
+
+    @PostMapping("/password")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void updatePassword(@RequestHeader String token, @RequestBody @Valid UpdatePasswordRequest request) {
+        log.info("updatePassword {} - {}", token, request);
+        updatePasswordService.updatePassword(token, request);
     }
 }

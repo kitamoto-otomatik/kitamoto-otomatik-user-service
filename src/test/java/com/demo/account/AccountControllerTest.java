@@ -1,11 +1,9 @@
 package com.demo.account;
 
 import com.demo.account.exception.RequestException;
-import com.demo.account.model.AccountStatus;
-import com.demo.account.model.CreateAccountRequest;
-import com.demo.account.model.ResetPasswordRequest;
-import com.demo.account.model.UpdateProfileRequest;
+import com.demo.account.model.*;
 import com.demo.account.service.*;
+import com.demo.keycloak.exception.AuthenticationException;
 import com.demo.keycloak.exception.KeycloakException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +50,9 @@ public class AccountControllerTest {
 
     @MockBean
     private UpdateProfileService updateProfileService;
+
+    @MockBean
+    private UpdatePasswordService updatePasswordService;
 
     @BeforeEach
     public void setup() {
@@ -375,5 +376,81 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
         verify(updateProfileService).updateProfile(token, request);
+    }
+
+    @Test
+    public void updatePassword() throws Exception {
+        UpdatePasswordRequest request = new UpdatePasswordRequest();
+        request.setOldPassword("old_password");
+        request.setNewPassword("new_password");
+
+        String token = "some_token";
+
+        mockMvc.perform(post("/accounts/password")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isAccepted());
+
+        verify(updatePasswordService).updatePassword(token, request);
+    }
+
+    @Test
+    public void updatePassword_whenInvalidBody() throws Exception {
+        UpdatePasswordRequest request = new UpdatePasswordRequest();
+        request.setOldPassword("");
+        request.setNewPassword(null);
+
+        String token = "some_token";
+
+        mockMvc.perform(post("/accounts/password")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("MethodArgumentNotValidException"))
+                .andExpect(jsonPath("$.message").value("newPassword must not be blank, oldPassword must not be blank"));
+
+        verifyNoInteractions(updatePasswordService);
+    }
+
+    @Test
+    public void updatePassword_whenInvalidHeader() throws Exception {
+        UpdatePasswordRequest request = new UpdatePasswordRequest();
+        request.setOldPassword("old_password");
+        request.setNewPassword("new_password");
+
+        mockMvc.perform(post("/accounts/password")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("MissingRequestHeaderException"))
+                .andExpect(jsonPath("$.message").value("Required request header 'token' for method parameter type String is not present"));
+
+        verifyNoInteractions(updatePasswordService);
+    }
+
+    @Test
+    public void updatePassword_whenError() throws Exception {
+        doThrow(new AuthenticationException("SOME ERROR")).when(updatePasswordService).updatePassword(anyString(), any());
+
+        UpdatePasswordRequest request = new UpdatePasswordRequest();
+        request.setOldPassword("old_password");
+        request.setNewPassword("new_password");
+
+        String token = "some_token";
+
+        mockMvc.perform(post("/accounts/password")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("AuthenticationException"))
+                .andExpect(jsonPath("$.message").value("SOME ERROR"));
+
+        verify(updatePasswordService).updatePassword(token, request);
     }
 }
