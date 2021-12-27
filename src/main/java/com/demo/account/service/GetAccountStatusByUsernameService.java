@@ -17,7 +17,7 @@ public class GetAccountStatusByUsernameService {
 
     public AccountStatus getAccountStatusByUsername(String username) {
         Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(username);
-        if (!optionalKeycloakUser.isPresent()) {
+        if (optionalKeycloakUser.isEmpty()) {
             return AccountStatus.UNREGISTERED;
         }
 

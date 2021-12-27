@@ -38,7 +38,7 @@ public class UpdatePasswordService {
         String username = tokenDecoder.getSubject(token);
 
         Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(username);
-        if (!optionalKeycloakUser.isPresent()) {
+        if (optionalKeycloakUser.isEmpty()) {
             throw new RequestException(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         }
 

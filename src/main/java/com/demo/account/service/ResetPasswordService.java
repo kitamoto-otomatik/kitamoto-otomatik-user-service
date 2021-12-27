@@ -31,7 +31,7 @@ public class ResetPasswordService {
 
     public void resetPassword(ResetPasswordRequest request) {
         Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(request.getUsername());
-        if (!optionalKeycloakUser.isPresent()) {
+        if (optionalKeycloakUser.isEmpty()) {
             throw new RequestException(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         }
 

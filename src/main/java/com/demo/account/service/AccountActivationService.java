@@ -27,7 +27,7 @@ public class AccountActivationService {
 
     public void activateAccount(String username, String accountActivationCode) {
         Optional<KeycloakUser> optionalKeycloakUser = keycloakUserClient.getUserByUsername(username);
-        if (!optionalKeycloakUser.isPresent()) {
+        if (optionalKeycloakUser.isEmpty()) {
             throw new RequestException(USERNAME_DOES_NOT_EXIST_ERROR_MESSAGE);
         }
 
