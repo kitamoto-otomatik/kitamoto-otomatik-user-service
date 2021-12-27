@@ -4,7 +4,7 @@ import com.demo.token.model.GetTokenRequest;
 import com.demo.token.model.Token;
 import com.demo.token.model.ValidateTokenRequest;
 import com.demo.token.service.GetTokenService;
-import com.demo.token.service.TokenValidationService;
+import com.demo.token.service.TokenDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ public class TokenController {
     private GetTokenService getTokenService;
 
     @Autowired
-    private TokenValidationService tokenValidationService;
+    private TokenDecoder tokenDecoder;
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
@@ -35,6 +35,6 @@ public class TokenController {
     @ResponseStatus(HttpStatus.OK)
     public void validateToken(@RequestBody @Valid ValidateTokenRequest request) {
         log.info("validateToken {}", request);
-        tokenValidationService.validate(request);
+        tokenDecoder.getSubject(request.getToken());
     }
 }

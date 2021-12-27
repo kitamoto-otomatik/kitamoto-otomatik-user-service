@@ -9,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,8 +27,8 @@ public class GeneralControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(AuthenticationException.class)
-    public HttpEntity<ErrorResponse> unauthorizedExceptionHandler(AuthenticationException e) {
+    @ExceptionHandler({AuthenticationException.class, MissingRequestHeaderException.class})
+    public HttpEntity<ErrorResponse> unauthorizedExceptionHandler(Exception e) {
         return new HttpEntity<>(new ErrorResponse(e.getClass().getSimpleName(), e.getMessage()));
     }
 

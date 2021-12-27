@@ -5,7 +5,7 @@ import com.demo.token.model.GetTokenRequest;
 import com.demo.token.model.Token;
 import com.demo.token.model.ValidateTokenRequest;
 import com.demo.token.service.GetTokenService;
-import com.demo.token.service.TokenValidationService;
+import com.demo.token.service.TokenDecoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ public class TokenControllerTest {
     private GetTokenService getTokenService;
 
     @MockBean
-    private TokenValidationService tokenValidationService;
+    private TokenDecoder tokenDecoder;
 
     private Token token;
 
@@ -118,7 +118,7 @@ public class TokenControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        verify(tokenValidationService).validate(request);
+        verify(tokenDecoder).getSubject(request.getToken());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class TokenControllerTest {
                 .andExpect(jsonPath("$.code").value("MethodArgumentNotValidException"))
                 .andExpect(jsonPath("$.message").value("token must not be blank"));
 
-        verifyNoInteractions(tokenValidationService);
+        verifyNoInteractions(tokenDecoder);
     }
 
     @Test
@@ -142,8 +142,8 @@ public class TokenControllerTest {
         ValidateTokenRequest request = new ValidateTokenRequest();
         request.setToken("someInvalid");
 
-        doThrow(new AuthenticationException("SOME ERROR")).when(tokenValidationService)
-                .validate(any());
+        doThrow(new AuthenticationException("SOME ERROR")).when(tokenDecoder)
+                .getSubject(any());
 
         mockMvc.perform(post("/token/validate")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -153,6 +153,6 @@ public class TokenControllerTest {
                 .andExpect(jsonPath("$.code").value("AuthenticationException"))
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
-        verify(tokenValidationService).validate(request);
+        verify(tokenDecoder).getSubject(request.getToken());
     }
 }

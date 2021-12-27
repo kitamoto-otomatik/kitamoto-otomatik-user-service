@@ -5,7 +5,6 @@ deployments
 - delete old images on create of new one
 
 features
-- update profile
 - change password
 - multi-factor challenge
 - social media login

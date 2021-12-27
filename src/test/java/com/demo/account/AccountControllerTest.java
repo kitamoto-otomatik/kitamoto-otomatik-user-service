@@ -1,8 +1,10 @@
 package com.demo.account;
 
+import com.demo.account.exception.RequestException;
 import com.demo.account.model.AccountStatus;
 import com.demo.account.model.CreateAccountRequest;
 import com.demo.account.model.ResetPasswordRequest;
+import com.demo.account.model.UpdateProfileRequest;
 import com.demo.account.service.*;
 import com.demo.keycloak.exception.KeycloakException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +49,9 @@ public class AccountControllerTest {
 
     @MockBean
     private ResetPasswordService resetPasswordService;
+
+    @MockBean
+    private UpdateProfileService updateProfileService;
 
     @BeforeEach
     public void setup() {
@@ -295,5 +300,80 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.message").value("SOME ERROR"));
 
         verify(resetPasswordService).resetPassword(request);
+    }
+
+    @Test
+    public void updateProfile() throws Exception {
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setFirstName("Nikki Nicholas");
+        request.setLastName("Romero");
+
+        String token = "some_token";
+
+        mockMvc.perform(post("/accounts/profile")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isAccepted());
+
+        verify(updateProfileService).updateProfile(token, request);
+    }
+
+    @Test
+    public void updateProfile_whenInvalidBody() throws Exception {
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setFirstName("");
+        request.setLastName(null);
+
+        String token = "some_token";
+
+        mockMvc.perform(post("/accounts/profile")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("MethodArgumentNotValidException"))
+                .andExpect(jsonPath("$.message").value("firstName must not be blank, lastName must not be blank"));
+
+        verifyNoInteractions(updateProfileService);
+    }
+
+    @Test
+    public void updateProfile_whenInvalidHeader() throws Exception {
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setFirstName("Nikki Nicholas");
+        request.setLastName("Romero");
+
+        mockMvc.perform(post("/accounts/profile")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("MissingRequestHeaderException"))
+                .andExpect(jsonPath("$.message").value("Required request header 'token' for method parameter type String is not present"));
+
+        verifyNoInteractions(updateProfileService);
+    }
+
+    @Test
+    public void updateProfile_whenError() throws Exception {
+        doThrow(new RequestException("SOME ERROR")).when(updateProfileService).updateProfile(anyString(), any());
+
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setFirstName("Nikki Nicholas");
+        request.setLastName("Romero");
+
+        String token = "some_token";
+
+        mockMvc.perform(post("/accounts/profile")
+                        .header("token", token)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.code").value("RequestException"))
+                .andExpect(jsonPath("$.message").value("SOME ERROR"));
+
+        verify(updateProfileService).updateProfile(token, request);
     }
 }

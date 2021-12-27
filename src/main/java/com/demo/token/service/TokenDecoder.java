@@ -13,16 +13,16 @@ import java.time.ZoneId;
 import static com.demo.ErrorMessage.KEYCLOAK_TOKEN_ERROR_MESSAGE;
 
 @Service
-public class TokenValidationService {
+public class TokenDecoder {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
     @Autowired
     private JwtService jwtService;
 
-    public void validate(ValidateTokenRequest request) {
+    public String getSubject(String token) {
         try {
-            Claims claims = jwtService.decodeJWT(secretKey, request.getToken());
+            Claims claims = jwtService.decodeJWT(secretKey, token);
 
             LocalDateTime expiration = claims.getExpiration().toInstant()
                     .atZone(ZoneId.systemDefault())
@@ -31,6 +31,8 @@ public class TokenValidationService {
             if (expiration.isBefore(LocalDateTime.now())) {
                 throw new AuthenticationException(KEYCLOAK_TOKEN_ERROR_MESSAGE);
             }
+
+            return claims.getSubject();
         } catch (Exception e) {
             throw new AuthenticationException(KEYCLOAK_TOKEN_ERROR_MESSAGE);
         }
