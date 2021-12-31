@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Build Application') {
             steps {
-                bat 'mvn clean verify package'
+                bat "mvn clean verify package sonar:sonar -Dsonar.host.url=${SONARQUBE_HOST} -Dsonar.login=${SONARQUBE_TOKEN}"
             }
         }
         stage('Build Image') {

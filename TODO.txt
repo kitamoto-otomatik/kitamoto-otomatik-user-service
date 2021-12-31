@@ -1,5 +1,5 @@
 deployments
-- add sonarqube
+- fix coverage issue
 
 features
 - multi-factor challenge
