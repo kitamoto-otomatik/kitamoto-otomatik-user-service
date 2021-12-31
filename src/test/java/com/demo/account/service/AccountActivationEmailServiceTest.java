@@ -32,6 +32,9 @@ public class AccountActivationEmailServiceTest {
     private AccountActivationEmailService target;
 
     @Mock
+    private Random random;
+
+    @Mock
     private MailClient<AccountActivationTemplateVariables> mailClient;
 
     @Mock
@@ -52,6 +55,8 @@ public class AccountActivationEmailServiceTest {
         ReflectionTestUtils.setField(target, "accountActivationEmailSender", ACCOUNT_ACTIVATION_EMAIL_SENDER);
         ReflectionTestUtils.setField(target, "accountActivationEmailSubject", ACCOUNT_ACTIVATION_EMAIL_SUBJECT);
         ReflectionTestUtils.setField(target, "accountActivationEmailTemplate", ACCOUNT_ACTIVATION_EMAIL_TEMPLATE);
+
+        when(random.nextInt(1_000_000)).thenReturn(12345);
     }
 
     @Test
@@ -113,7 +118,6 @@ public class AccountActivationEmailServiceTest {
         assertThat(mail.getSubject()).isEqualTo(ACCOUNT_ACTIVATION_EMAIL_SUBJECT);
         assertThat(mail.getTemplate()).isEqualTo(ACCOUNT_ACTIVATION_EMAIL_TEMPLATE);
         assertThat(mail.getTemplateVariables()).isNotNull();
-        assertThat(mail.getTemplateVariables().getAccountActivationLink()).isNotEqualTo("http://localhost:4200/accountActivation?emailAddress=nikkinicholas.romero@gmail.com&accountActivationCode=abcdef");
-        assertThat(mail.getTemplateVariables().getAccountActivationLink()).startsWith("http://localhost:4200/accountActivation?emailAddress=nikkinicholas.romero@gmail.com&accountActivationCode=");
+        assertThat(mail.getTemplateVariables().getAccountActivationLink()).isEqualTo("http://localhost:4200/accountActivation?emailAddress=nikkinicholas.romero@gmail.com&accountActivationCode=12345");
     }
 }

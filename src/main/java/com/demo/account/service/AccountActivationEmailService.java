@@ -37,6 +37,9 @@ public class AccountActivationEmailService {
     private String accountActivationEmailTemplate;
 
     @Autowired
+    private Random random;
+
+    @Autowired
     private KeycloakUserClient keycloakUserClient;
 
     @Autowired
@@ -44,7 +47,7 @@ public class AccountActivationEmailService {
 
     @Async
     public void sendAccountActivationCode(String username) {
-        String accountActivationCode = String.valueOf(new Random().nextInt(1_000_000));
+        String accountActivationCode = String.valueOf(random.nextInt(1_000_000));
         sendAccountActivationCode(username, accountActivationCode);
     }
 
