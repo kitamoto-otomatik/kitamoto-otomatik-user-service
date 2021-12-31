@@ -1,6 +1,3 @@
-deployments
-- fix coverage issue
-
 features
 - multi-factor challenge
 - social media login
