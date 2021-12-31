@@ -1,7 +1,5 @@
 deployments
-- move values to configMaps
 - add sonarqube
-- delete old images on create of new one
 
 features
 - multi-factor challenge

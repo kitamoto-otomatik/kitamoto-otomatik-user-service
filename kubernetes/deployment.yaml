@@ -25,9 +25,34 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: kitamoto-otomatik-user-service
-                  key: KEYCLOAK_HOST
+                  key:
+            - name: KEYCLOAK_TOKEN_CLIENT_ID_VALUE
+              valueFrom:
+                configMapKeyRef:
+                  name: kitamoto-otomatik-user-service
+                  key: KEYCLOAK_TOKEN_CLIENT_ID_VALUE
             - name: KEYCLOAK_TOKEN_CLIENT_SECRET_VALUE
               valueFrom:
                 configMapKeyRef:
                   name: kitamoto-otomatik-user-service
                   key: KEYCLOAK_TOKEN_CLIENT_SECRET_VALUE
+            - name: MAIL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kitamoto-otomatik-user-service
+                  key: MAIL_HOST
+            - name: ACCOUNT_ACTIVATION_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: kitamoto-otomatik-user-service
+                  key: ACCOUNT_ACTIVATION_URL
+            - name: PASSWORD_RESET_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: kitamoto-otomatik-user-service
+                  key: PASSWORD_RESET_URL
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: kitamoto-otomatik-user-service
+                  key: JWT_SECRET_KEY
